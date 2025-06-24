@@ -5,7 +5,7 @@
 
     <!--<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">-->
     <meta charset="UTF-8">
-    <!--    <link rel="stylesheet" href="basecss.css"/> -->
+<!--    <link rel="stylesheet" href="basecss.css"/> -->
     <style>
         /*!
  * Generated using the Bootstrap Customizer (https://getbootstrap.com/docs/3.4/customize/)
@@ -45,7 +45,7 @@
             font-weight: bold;
         }
 
-        .toc, .title-page, .user-details, .single-test, .test-list {
+        .toc, .title-page, .user-details, .validation, .single-test, .test-list {
             page-break-after: always;
 
         }
@@ -101,12 +101,24 @@
             page-break-inside: auto;
         }
 
+        .validation .detail {
+            page-break-inside: avoid;
+        }
+
         .test-details {
             page-break-before: always;
         }
 
         a {
             font-variant-ligatures: none;
+        }
+
+        .invalid {
+            background-color: #e4b9b9;
+        }
+
+        h4 {
+            font-weight: bold;
         }
     </style>
 
@@ -116,19 +128,19 @@
 <body>
 <script type="text/x-handlebars" id="template">
     <div class="title-page">
-        <!--        <img class="rtr-logo-title" src="data:image/png;base64,{{logo}}" />-->
+<!--        <img class="rtr-logo-title" src="data:image/png;base64,{{logo}}" />-->
         <h1>{{ Lang.results_certified_measurement }}</h1>
-        <p class="date">{{ Lang.generated_at }}: {{date}} ({{Lang.prague}})</p>
+        <p class="date">{{ Lang.generated_at }}: {{date}}</p>
     </div>
     <div class="toc">
         <h2>{{ Lang.table_of_contents }}</h2>
         <ul>
             <li><a href="#test-list">1. {{ Lang.conducted_measurements }}</a></li>
-            <li><a href="#user-details">2. {{ Lang.user_provided_data }}</a></li>
+            <li><a href="#validation">2. Validace</a></li>
             <li><a href="#test-details">3. {{ Lang.single_measurement_results }}</a></li>
             <ul>
                 {{#each tests}}
-                <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{time}}</a></li>
+                    <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{toLocalTime time}}</a></li>
                 {{/each}}
             </ul>
         </ul>
@@ -141,8 +153,8 @@
             <thead>
             <tr>
                 <th>#</th>
-                <th>{{ Lang.time_utc }}</th>
-                <th>{{ Lang.open_test_uuid }}</th>
+                <th>{{ Lang.time }}</th>
+                <th>Status</th>
                 <th class="text-right">{{ Lang.download }}<br/>({{ Lang.mbps }})</th>
                 <th class="text-right">{{ Lang.upload }}<br/>({{ Lang.mbps }})</th>
                 <th class="text-right">{{ Lang.ping }}<br/>({{ Lang.ms }})</th>
@@ -150,14 +162,14 @@
             </thead>
             <tbody>
             {{#each tests}}
-            <tr>
-                <th scope="row">{{add @index 1}}</th>
-                <td>{{time}}</td>
-                <td>{{open_test_uuid}}</td>
-                <td class="text-right">{{toMbit download_kbit}}</td>
-                <td class="text-right">{{toMbit upload_kbit}}</td>
-                <td class="text-right">{{twoSignificantDigits ping_ms}}</td>
-            </tr>
+                <tr>
+                    <th scope="row">{{add @index 1}}</th>
+                    <td>{{toLocalTime time}}</td>
+                    <td>{{translatedStatus}}</td>
+                    <td class="text-right">{{toMbit download_kbit}}</td>
+                    <td class="text-right">{{toMbit upload_kbit}}</td>
+                    <td class="text-right">{{twoSignificantDigits ping_ms}}</td>
+                </tr>
             {{/each}}
             </tbody>
         </table>
@@ -169,155 +181,115 @@
         {{/if }}
     </div>
 
-    <div class="user-details" id="user-details">
-        <h2>{{ Lang.user_provided_data }}</h2>
+    <div class="validation" id="validation">
+        <h2>Validace</h2>
+        <p>
+            V této sekci jsou provedeny některé automatické kontroly výsledků měření, za účelem ověření, zda provedená měření odpovídají stanoveným podmínkám certifikovaného měření. Výsledkem kontroly je sdělení, jestli byly nebo nebyly detekovány v protokolu chyby a o jaké chyby se jedná.
+        </p>
         <div class="detail">
-            {{#if title_prepend}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.title_prepended }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{title_prepend}}
-                </p>
-            </div>
-            {{/if}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.first_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{first_name}}
-                </p>
-            </div>
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.last_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{last_name}}
-                </p>
-            </div>
-            {{#if title_prepend}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.title_appended }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{title_append}}
-                </p>
-            </div>
-            {{/if}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.measurement_location }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{nl2br address}}
-                </p>
-            </div>
-            <!-- <div class="row">
-               <p class="col-xs-4 text-right">
-                   <strong>Zyklus</strong>
-               </p>
-               <p class="col-xs-8">
-                   {{#ifCond first '==' 'y'}}
-                   Erster Messzyklus
-                   {{/ifCond}}
-                   {{#ifCond first '==' 'n'}}
-                   Folgezyklus
-                   {{/ifCond}}
-               </p>
-            </div> -->
+            UUID certifikovaného měření: {{removeFirst loop_uuid}}
+            <ul>
+                {{#each tests}}
+                    <li>Měření {{add @index 1}} UUID: {{removeFirst open_test_uuid}}</li>
+                {{/each}}
+            </ul>
         </div>
-        {{#ifCond first '==' 'y'}}
         <div class="detail">
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.provider_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{ isp_name }}
-                </p>
-            </div>
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.provider_service_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{ isp_service_name }}
-                </p>
-            </div>
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.provider_contract_number }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{ isp_contract_number }}
-                </p>
-            </div>
+            {{#if valid }}
+                <h3>V certifikovaném měření nebyly detekovány chyby</h3>
+            {{else}}
+                <h3>V certifikovaném měření byly detekovány chyby</h3>
+                {{#if invalidDistance }}
+                    <h4>Vzdálenost od prvního testu</h4>
+                    <p>Maximální povolená uražená vzdálenost mezi testy: {{ maxValidDistance }} metrů</p>
+                    <p>Zdroj polohy: {{ validDistanceLocSrc }}</p>
+                    <ul>
+                    {{#each invalidDistance }}
+                        <li>Měření č.{{ testId }}: {{ distance }} metrů<br/>{{ locSrc }}</li>
+                    {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if invalidNumOfTests }}
+                    <h4>Počet měření</h4>
+                    <ul><li>Počet dokončených měření musí být 6, dokončených měření: {{ numOfFinishedTests }}</li></ul>
+                {{/if}}
+                {{#if invalidTime }}
+                    <h4>Trvání měření</h4>
+                    <ul><li>Měření trvalo déle než 60 minut. Počet minut trvání: {{ invalidTime }}</li></ul>
+                {{/if}}
+                {{#if invalidLocation}}
+                    <h4>Určení polohy měření</h4>
+                    <ul>
+                    {{#each invalidLocation}}
+                        <li>Měření č.{{this}} - chybí souřadnice</li>
+                    {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if invalidNetwork}}
+                    <h4>Typ sítě</h4>
+                    <p>Měření nebyla provedena v mobilní síti</p>
+                    <ul>
+                        <li>Měření nebyla provedena v mobilní síti</li>
+                        <ul>
+                            {{#each invalidNetwork}}
+                                <li>Měření č.{{testNum}} - {{networkType}}</li>
+                            {{/each}}
+                        </ul>
+                    </ul>
+                {{/if}}
+                {{#if invalidMcc }}
+                    <h4>Zařízení bylo v průběhu měření připojeno do sítě mimo Českou republiku</h4>
+                    <ul>
+                        {{#each invalidMcc }}
+                            <li>Měření č.{{ testNum }} - {{mcc}}</li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if invalidSimOperator }}
+                    <h4>Bylo zjištěno, že SIM kód operátora není stejný jako kód sítě operátora</h4>
+                    <ul>
+                        {{#each invalidSimOperator }}
+                            <li>Měření č.{{ testNum }} - operátor: {{networkMccMnc}}, sim: {{simMccMnc}}</li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if invalidSameNetwork}}
+                    <h4>Měření nebyla provedena v síti jednoho operátora</h4>
+                    <ul>
+                        {{#each tests}}
+                            <li>Měření č.{{add @index 1}} - {{network_mcc_mnc}}</li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if invalidSignal }}
+                    <h4>Slabý signál</h4>
+                    <ul>
+                    {{#each invalidSignal }}
+                        <li>Měření č.{{ testId }}:
+                            <ul>
+                                {{#each messages}}
+                                    <li>{{this}}</li>
+                                {{/each}}
+                            </ul>
+                        </li>
+                    {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if invalidRoaming }}
+                    <h4>Roaming</h4>
+                    <ul>
+                        <li>Během měření by zařízení nemělo být připojeno přes roaming</li>
+                        <li><h5>Typ roamingu</h5></li>
+                        <ul>
+                        {{#each invalidRoaming }}
+                            <li>Měření č.{{ testId }} typ roamingu: {{ roamingType }}, network type: {{ networkType }}</li>
+                        {{/each}}
+                        </ul>
+                    </ul>
+                {{/if}}
+            {{/if}}
         </div>
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.provider_speed }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{ isp_speed }}
-            </p>
-        </div>
-
-        {{#if type_text}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.access_type }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{nl2br type_text}}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if test_device}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.test_device }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{nl2br test_device}}
-            </p>
-        </div>
-        {{/if}}
-
     </div>
-
-    {{#if test_picturesArr}}
-    <div class="">
-        {{#each test_picturesArr}}
-        <div class="row detail">
-            <p class="col-xs-2 text-right">
-                <strong>{{ Lang.photo_upload }}</strong>
-            </p>
-            <p class="col-xs-9">
-                <img src="{{this}}" class="img-responsive" style="max-height:20cm" />
-            </p>
-        </div>
-        {{/each}}
-    </div>
-    {{/if}}
-    {{#if test_pictures}}
-    <div class="">
-        <div class="row detail">
-            <p class="col-xs-2 text-right">
-                <strong>{{ Lang.photo_upload }}</strong>
-            </p>
-            <p class="col-xs-9">
-                <img src="{{test_pictures}}" class="img-responsive" style="max-height:20cm" />
-            </p>
-        </div>
-    </div>
-    {{/if}}
-    </div>
-    {{/ifCond}}
 
     <div class="test-details" id="test-details">
         {{#each tests}}
@@ -326,9 +298,13 @@
             <h3>{{ Lang.result }}</h3>
             <table class="table table-striped">
                 <colgroup>
-                    <col class="col-xs-3"/>
-                    <col class="col-xs-9"/>
+                    <col class="col-xs-4"/>
+                    <col class="col-xs-8"/>
                 </colgroup>
+                <tr>
+                    <td>Status</td>
+                    <td>{{translatedStatus}}</td>
+                </tr>
                 <tr>
                     <td>{{ Lang.download }}</td>
                     <td>{{toMbit download_kbit}} {{ Lang.mbps }}</td>
@@ -343,157 +319,12 @@
                 </tr>
                 <tr>
                     <td>{{ Lang.time_utc }}</td>
-                    <td>{{time}}</td>
+                    <td>{{toLocalFormat time}}</td>
                 </tr>
                 <tr>
-                    <td>{{ Lang.open_test_uuid }}</td>
-                    <td>{{open_test_uuid}}</td>
+                    <td>{{ Lang.time_device }}</td>
+                    <td>{{toLocalTime time}} ({{timezone}}) </td>
                 </tr>
-            </table>
-            <p>
-                {{ Lang.result_detail_link }}: <br/><a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?O{{open_test_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?O{{open_test_uuid}}</a>
-            </p>
-
-            <h3>{{ Lang.detailed_result }}</h3>
-            <table class="table table-striped table-condensed">
-                <colgroup>
-                    <col class="col-xs-3"/>
-                    <col class="col-xs-9"/>
-                </colgroup>
-                <tr>
-                    <td>{{ Lang.network_type }}</td>
-                    <td>{{network_type}}</td>
-                </tr>
-                <tr>
-                    <td>{{ Lang.cat_technology }}</td>
-                    <td>{{cat_technology}}</td>
-                </tr>
-                {{#if position}}
-                <tr>
-                    <td>{{ Lang.location }}</td>
-                    <td>{{position}}</td>
-                </tr>
-                {{/if}}
-                {{#if provider_name}}
-                <tr>
-                    <td>{{ Lang.provider_name }}</td>
-                    <td>{{provider_name}}</td>
-                </tr>
-                {{/if}}
-                <tr>
-                    <td>{{ Lang.ip_anonym }}</td>
-                    <td>{{ip_anonym}}</td>
-                </tr>
-                {{#if connection}}
-                <tr>
-                    <td>{{ Lang.nat_type }}</td>
-                    <td>{{connection}}</td>
-                </tr>
-                {{/if}}
-                <tr>
-                    <td>{{ Lang.asn }}</td>
-                    <td>{{asn}}</td>
-                </tr>
-                {{#if public_ip_as_name}}
-                <tr>
-                    <td>{{ Lang.public_ip_as_name }}</td>
-                    <td>{{public_ip_as_name}}</td>
-                </tr>
-                {{/if}}
-                {{#if country_asn}}
-                <tr>
-                    <td>{{ Lang.country_asn }}</td>
-                    <td>{{country_asn}}</td>
-                </tr>
-                {{/if}}
-                <tr>
-                    <td>{{ Lang.platform }}</td>
-                    <td>{{platform}}</td>
-                </tr>
-                {{#if model}}
-                <tr>
-                    <td>{{ Lang.model }}</td>
-                    <td>{{model}}</td>
-                </tr>
-                {{/if}}
-                {{#if model_native}}
-                <tr>
-                    <td>{{ Lang.model_native }}</td>
-                    <td>{{model_native}}</td>
-                </tr>
-                {{/if}}
-                {{#if time_dl_ms}}
-                <tr>
-                    <td>{{ Lang.time_dl_ms }}</td>
-                    <td>{{roundNumber time_dl_ms 0}} ms</td>
-                </tr>
-                {{/if}}
-                {{#if duration_download_ms}}
-                <tr>
-                    <td>{{ Lang.duration_download_ms }}</td>
-                    <td>{{roundNumber duration_download_ms 0}} ms</td>
-                </tr>
-                {{/if}}
-                {{#if bytes_download}}
-                <tr>
-                    <td>{{ Lang.bytes_download }}</td>
-                    <td>{{toMB bytes_download}} MB</td>
-                </tr>
-                {{/if}}
-                {{#if time_ul_ms}}
-                <tr>
-                    <td>{{ Lang.time_ul_ms }}</td>
-                    <td>{{roundNumber time_ul_ms 0}} ms</td>
-                </tr>
-                {{/if}}
-                {{#if duration_upload_ms}}
-                <tr>
-                    <td>{{ Lang.duration_upload_ms }}</td>
-                    <td>{{roundNumber duration_upload_ms 0}} ms</td>
-                </tr>
-                {{/if}}
-                {{#if bytes_upload}}
-                <tr>
-                    <td>{{ Lang.bytes_upload }}</td>
-                    <td>{{toMB bytes_upload}} MB</td>
-                </tr>
-                {{/if}}
-                {{#if server_name}}
-                <tr>
-                    <td>{{ Lang.server_name }}</td>
-                    <td>{{server_name}}</td>
-                </tr>
-                {{/if}}
-                {{#if client_version}}
-                <tr>
-                    <td>{{ Lang.client_version }}</td>
-                    <td>{{client_version}}</td>
-                </tr>
-                {{/if}}
-                {{#if test_duration}}
-                <tr>
-                    <td>{{ Lang.duration }}</td>
-                    <td>{{test_duration}} s</td>
-                </tr>
-                {{/if}}
-                {{#if num_threads_requested}}
-                <tr>
-                    <td>{{ Lang.num_threads_requested }}</td>
-                    <td>{{num_threads_requested}}</td>
-                </tr>
-                {{/if}}
-                {{#if num_threads}}
-                <tr>
-                    <td>{{ Lang.num_threads }}</td>
-                    <td>{{num_threads}}</td>
-                </tr>
-                {{/if}}
-                {{#if num_threads_ul}}
-                <tr>
-                    <td>{{ Lang.num_threads_ul }}</td>
-                    <td>{{num_threads_ul}}</td>
-                </tr>
-                {{/if}}
                 <tr>
                     <td>{{ Lang.open_test_uuid }}</td>
                     <td>{{open_test_uuid}}</td>
@@ -502,213 +333,249 @@
                     <td>{{ Lang.open_uuid }}</td>
                     <td>{{open_uuid}}</td>
                 </tr>
+
+            <!-- others section -->
+                <tr>
+                    <td>{{ Lang.network_type }}</td>
+                    <td>{{network_type}}</td>
+                </tr>
+<!--                <tr>-->
+<!--                    <td>{{ Lang.cat_technology }}</td>-->
+<!--                    <td>{{cat_technology}}</td>-->
+<!--                </tr>-->
+                {{#if position}}
+                    <tr>
+                        <td>{{ Lang.location }}</td>
+                        <td>{{position}}</td>
+                    </tr>
+                {{/if}}
+                {{#if provider_name}}
+                    <tr>
+                        <td>{{ Lang.provider_name }}</td>
+                        <td>{{provider_name}}</td>
+                    </tr>
+                {{/if}}
+            <!-- location section -->
+                <tr>
+                    <td>Souřadnice</td><!-- TODO i18n -->
+                    <td>{{lat}} {{long}}</td>
+                </tr>
+                <tr>
+                    <td>Poskytovatel souřadnice</td><!-- TODO i18n -->
+                    <td>{{loc_src}}</td>
+                </tr>
+                <tr>
+                    <td>Přesnost polohy</td><!-- TODO i18n -->
+                    <td>{{roundUp loc_accuracy}} metrů</td>
+                </tr>
+                <tr>
+                    <td>Pohyb v průběhu měření</td><!-- TODO i18n -->
+                    <td>{{roundUp distance}} metrů</td>
+                </tr>
+            </table>
+            <p>
+                {{ Lang.result_detail_link }}: <br/><a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?O{{open_test_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?O{{open_test_uuid}}</a>
+            </p>
+
+            <h3>{{ Lang.detailed_result }}</h3>
+
+            <table class="table table-striped table-condensed">
+                <colgroup>
+                    <col class="col-xs-4"/>
+                    <col class="col-xs-8"/>
+                </colgroup>
+                <!-- ip section -->
+                <tr>
+                    <td>IP public</td><!-- TODO i18n -->
+                    <td>{{ip_public}}</td>
+                </tr>
+                <tr>
+                    <td>IP local</td><!-- TODO i18n -->
+                    <td>{{ip_local}}</td>
+                </tr>
+                <tr>
+                    <td>Název serveru</td><!-- TODO i18n -->
+                    <td>{{server_name}}</td>
+                </tr>
+                <tr>
+                    <td>Adresa serveru</td><!-- TODO i18n -->
+                    <td>{{server_web_address}}</td>
+                </tr>
+                {{#if connection}}
+                    <tr>
+                        <td>NAT</td><!-- TODO i18n -->
+                        <td>{{connection}}</td>
+                    </tr>
+                {{/if}}
+                <tr>
+                    <td>{{ Lang.asn }}</td>
+                    <td>{{asn}}</td>
+                </tr>
+            <!-- data section -->
+                {{#if time_dl_ms}}
+                    <tr>
+                        <!--                                    <td>{{ Lang.time_dl_ms }}</td>-->
+                        <td>Začátek měření download</td><!-- TODO i18n -->
+                        <td>{{roundNumber time_dl_ms 0}} ms</td>
+                    </tr>
+                {{/if}}
+                {{#if duration_download_ms}}
+                    <tr>
+                        <td>{{ Lang.duration_download_ms }}</td>
+                        <td>{{roundNumber duration_download_ms 0}} ms</td>
+                    </tr>
+                {{/if}}
+                {{#if bytes_download}}
+                    <tr>
+                        <td>{{ Lang.bytes_download }}</td>
+                        <td>{{toMB bytes_download}} MB</td>
+                    </tr>
+                {{/if}}
+                {{#if time_ul_ms}}
+                    <tr>
+                        <!--                                    <td>{{ Lang.time_ul_ms }}</td>-->
+                        <td>Začátek měření upload</td><!-- TODO i18n -->
+                        <td>{{roundNumber time_ul_ms 0}} ms</td>
+                    </tr>
+                {{/if}}
+                {{#if duration_upload_ms}}
+                    <tr>
+                        <td>{{ Lang.duration_upload_ms }}</td>
+                        <td>{{roundNumber duration_upload_ms 0}} ms</td>
+                    </tr>
+                {{/if}}
+                {{#if bytes_upload}}
+                    <tr>
+                        <td>{{ Lang.bytes_upload }}</td>
+                        <td>{{toMB bytes_upload}} MB</td>
+                    </tr>
+                {{/if}}
+            <!-- network section -->
+                <tr>
+                    <td>Kód sítě operátora</td><!-- TODO i18n -->
+                    <td>{{network_mcc_mnc}}</td>
+                </tr>
+                <tr>
+                    <td>Název sítě operátora</td><!-- TODO i18n -->
+                    <td>{{network_name}}</td>
+                </tr>
+                <tr>
+                    <td>SIM kód operátora</td><!-- TODO i18n -->
+                    <td>{{sim_mcc_mnc}}</td>
+                </tr>
+                <tr>
+                    <td>SIM název operátora</td><!-- TODO i18n -->
+                    <td>{{sim_operator_name}}</td>
+                </tr>
+            <!-- mobile section -->
+                <tr>
+                    <td>{{ Lang.platform }}</td>
+                    <td>{{platform}}</td>
+                </tr>
+                <tr>
+                    <td>Verze systému</td><!-- TODO i18n -->
+                    <td>{{os_version}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.model_native }}</td>
+                    <td>{{model_native}}</td>
+                </tr>
+                <tr>
+                    <td>DUAL SIM</td><!-- TODO i18n -->
+                    <td>{{boolToText dual_sim}}</td>
+                </tr>
+                <tr>
+                    <td>Verze aplikace</td><!-- TODO i18n -->
+                    <td>{{client_version}}</td>
+                </tr>
             </table>
 
-
-
-
+        <div class="single-test">
+            <h3>Síla signálu (detail)</h3>
+            <table class="table table-striped table-condensed">
+                <thead>
+                    <tr style="font-weight: bold; font-size: smaller">
+                        <td>Čas</td>
+                        <td>LocationId</td>
+                        <td>Area Code</td>
+<!--                        <td>Scrambling Code</td>-->
+                        <td>Channel Number</td>
+                        <td>RSRP</td>
+                        <td>RSRQ</td>
+<!--                        <td>Timing Advance</td>-->
+<!--                        <td>Network Type</td>-->
+                        <td>Technology</td>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each signal_list}}
+                    <tr>
+                        <td>{{time}}</td>
+                        <td>{{location_id}}</td>
+                        <td>{{area_code}}</td>
+<!--                        <td>{{primary_scrambling_code}}</td>-->
+                        <td>{{channel_number}}</td>
+                        <!-- RSRP column -->
+                        <td>{{conditioned_signal_strength}}</td>
+                        <td>{{lte_rsrq}}</td>
+<!--                        <td>{{timing_advance}}</td>-->
+<!--                        <td>{{network_type}}</td>-->
+                        <td>{{network_technology}}</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
 
         </div>
+<!--        <div class="single-test">-->
+<!--            <h3>IP</h3>-->
+<!--            <p>IP public: {{ip_public}}</p>-->
+<!--            <p>IP local: {{ip_local}}</p>-->
+<!--            <p>Local IP type: {{ip_local_type}}</p>-->
+<!--            <p>NAT type: {{connection}}</p>-->
+
+<!--            <h3>Location</h3>-->
+<!--            <p>GPS: {{lat}} {{long}}</p>-->
+<!--            <p>Latitude: {{lat}}</p>-->
+<!--            <p>Longitude: {{long}}</p>-->
+<!--            <p>Geo provider: {{loc_src}}</p>-->
+<!--            <p>Geo accuracy: {{loc_accuracy}}</p>-->
+<!--            <p>Distance during test: {{distance}} meters</p>-->
+
+<!--            <h3>Signal</h3>-->
+<!--            <p>LTE rsrp: {{lte_rsrp}}</p>-->
+<!--            <p>LTE rsrq: {{lte_rsrq}}</p>-->
+<!--            <p>Cell area code: {{cell_area_code}}</p>-->
+
+<!--            <h3>Network</h3>-->
+<!--            <p>Network operator: {{network_mcc_mnc}}</p>-->
+<!--            <p>Network operator name: {{network_name}}</p>-->
+<!--            <p>Sim operator: {{sim_mcc_mnc}}</p>-->
+<!--            <p>Sim operator name: {{sim_operator_name}}</p>-->
+<!--            <p>Network group type: {{network_type}}</p>-->
+<!--            <p>Network group name: {{cat_technology}}</p>-->
+
+<!--            <h3>Mobil</h3>-->
+<!--            <p>Platform: {{platform}}</p>-->
+<!--            <p>OS version: {{os_version}}</p>-->
+<!--            <p>Model: {{model}}</p>-->
+<!--            <p>Dual sim: {{dual_sim}}</p>-->
+<!--            <p>Dual sim detection method: {{dual_sim_detection_method}}</p>-->
+
+<!--            <h3>Cell location</h3>-->
+<!--            {{#each cell_locations}}-->
+<!--                <ul>-->
+<!--                    <li>LocationId: {{location_id}}</li>-->
+<!--                    <li>Area code: {{area_code}}</li>-->
+<!--                    <li>Primary scrambling code: {{primary_scrambling_code}}</li>-->
+<!--                    <li>Time: {{time}}</li>-->
+<!--                </ul>-->
+<!--            {{/each}}-->
+<!--        </div>-->
         {{/each}}
 
     </div>
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.js"></script>
-<script>
-    //some demo tests
-    const loop_uuid = 'L33c1a04c-610e-4060-8ae7-7c812b7eb512';
-    let allData = [];
-
-    var Lang = {
-        "lang": "de",
-        "results_certified_measurement": "Ergebnisse der zertifizierten Messung",
-        "generated_at": "Ausdruck erstellt am",
-        "table_of_contents": "Inhaltsverzeichnis",
-        "conducted_measurements": "Durchgeführte Messungen",
-        "user_provided_data": "Angaben des Nutzers/der Nutzerin",
-        "single_measurement_results": "Einzelergebnisse",
-        "conducted_measurements_desc": "Folgende Messungen wurden durchgeführt",
-        "time": "Testzeitpunkt",
-        "open_test_uuid": "Open-Test-UUID",
-        "download": "Download",
-        "upload": "Download",
-        "ping": "Download",
-        "mbps": "Mbit/s",
-        "ms": "ms",
-        "results_url": "Alle Ergebnisse sind unter folgender URL abrufbar",
-        "title_prepended": "Titel (vorangestellt)",
-        "first_name": "Vorname",
-        "last_name": "Nachname",
-        "title_appended": "Titel (nachgestellt)",
-        "measurement_location": "Standort der Messungen",
-        "first_cycle_question": "Handelt es sich um den ersten Messzyklus?",
-        "yes_first_cycle": "Ja, erster Messzyklus",
-        "no_subsequent_cycle": "Nein, Folgezyklus",
-        "location_access": "Beschreiben Sie den Standort des Anschlusses",
-        "location_access_residential": "Wohnhausanlage",
-        "location_access_single_family": "Einfamilienhaus",
-        "location_access_urban": "Städtischer Umgebung",
-        "location_access_rural": "Ländliche Umgebung",
-        "location_access_other": "Sonstiges",
-        "access_type": "Beschreiben Sie Ihren Anschluss",
-        "test_device": "Beschreiben Sie Ihr Testgerät",
-        "photo_upload": "Fotoupload",
-        "measurement": "Messung",
-        "result_detail_link": "Dieses Ergebnis kann hier im Detail abgerufen werden",
-        "result": "Testergebnis",
-        "detailed_result": "Detailergebnis",
-        'network_type': 'Netztyp',
-        'cat_technology' : 'Verbindungstechnologie',
-        'provider_name': 'Betreiber',
-        'nat_type': 'NAT-Status',
-        'location': 'Standort',
-        'ip_anonym' : 'IP (anonymisiert)',
-        'asn': 'AS-Nummer',
-        'public_ip_as_name': 'Name des IP-Netzwerks',
-        'country_asn': 'Land des AS',
-        'platform' : 'Plattform',
-        'model': 'Modell',
-        'model_native': 'Modell (Original)',
-        'time_dl_ms': 'Rel. Startzeitpunkt Download',
-        'time_ul_ms': 'Rel. Startzeitpunkt Upload',
-        'bytes_download': 'Datenmenge Download',
-        'bytes_upload': 'Datenmenge Upload',
-        'duration_download_ms': 'Downloaddauer',
-        'duration_upload_ms': 'Uploaddauer',
-        'server_name': 'Name Testserver',
-        'client_version': 'RMBT-Version',
-        'duration': 'Testdauer',
-        'num_threads_requested': 'Anzahl angef. Verbindungen',
-        'num_threads': 'Parallele Verbindungen DL',
-        'num_threads_ul': 'Parallel Verbindungen UL',
-        'open_uuid' : 'Open-User-UUID'
-    }
-
-
-    fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/search?loop_uuid=' + loop_uuid)
-        .then(response => {
-            return response.json()
-        })
-        .then(tests => {
-            return Promise.all(
-                tests.results.map(test => {
-                                      return fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/' + test.open_test_uuid)
-                                          .then(response => {
-                                              return response.json();
-                                          })
-                                          .then(test => {
-                                              test.Lang = Lang;
-                                              allData.push(test);
-                                          })
-                                  }
-                ))
-        })
-
-        .then(done => {
-            //fill model
-            let model = {
-                tests: allData,
-                loop_uuid: loop_uuid,
-                date: (new Date()).toLocaleString(),
-                Lang: Lang
-            };
-
-            var template = Handlebars.compile(document.querySelector("#template").innerHTML);
-            var html = template(model);
-
-            window.setTimeout(function() {
-                document.getElementsByTagName("body")[0].innerHTML = html;
-            }, 0);
-        })
-
-
-
-
-    //https://stackoverflow.com/questions/26529338/handlebars-js-template-with-custom-helper-to-slice-data-array
-    Handlebars.registerHelper('slice', function (context, limit, offset, block) {
-        var ret = "";
-        var i = (offset < context.length) ? offset : 0;
-        var j = ((limit + offset) < context.length) ? (limit + offset) : context.length;
-
-        for (i, j; i < j; i++) {
-            ret += block.fn(context[i]);
-        }
-        return ret;
-    });
-
-    Handlebars.registerHelper('IfLE', function(list, size, options) {
-        if (list.length <= size) {
-            return options.fn(this);
-        }
-        else {
-            return options.inverse(this);
-        }
-    });
-
-    //https://stackoverflow.com/questions/8853396/logical-operator-in-a-handlebars-js-if-conditional
-    Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
-        if (v1 instanceof Array) {
-            v1 = v1.length;
-        }
-
-
-        switch (operator) {
-            case '==':
-                return (v1 == v2) ? options.fn(this) : options.inverse(this);
-            case '===':
-                return (v1 === v2) ? options.fn(this) : options.inverse(this);
-            case '!=':
-                return (v1 != v2) ? options.fn(this) : options.inverse(this);
-            case '!==':
-                return (v1 !== v2) ? options.fn(this) : options.inverse(this);
-            case '<':
-            case '&lt;':
-                return (v1 < v2) ? options.fn(this) : options.inverse(this);
-            case '<=':
-            case '&lt;=':
-                return (v1 <= v2) ? options.fn(this) : options.inverse(this);
-            case '>':
-            case '&gt;':
-                return (v1 > v2) ? options.fn(this) : options.inverse(this);
-            case '>=':
-            case '&gt;=':
-                return (v1 >= v2) ? options.fn(this) : options.inverse(this);
-            case '&&':
-                return (v1 && v2) ? options.fn(this) : options.inverse(this);
-            case '||':
-                return (v1 || v2) ? options.fn(this) : options.inverse(this);
-            default:
-                return options.inverse(this);
-        }
-    });
-
-    //https://stackoverflow.com/a/11924998
-    Handlebars.registerHelper('times', function(n, block) {
-        var accum = '';
-        for(var i = 0; i < n; ++i)
-            accum += block.fn(i);
-        return accum;
-    });
-
-    Handlebars.registerHelper("add",(number, increment) => {
-        var iNumber = parseInt(number);
-        var sum = iNumber + increment;
-        return sum;
-    });
-
-    Handlebars.registerHelper("toMbit",(number) => {
-        return (number/1000).toLocaleString('de-DE',{maximumSignificantDigits:2});;
-    });
-
-    Handlebars.registerHelper("twoSignificantDigits",(number) => {
-        return number.toLocaleString('de-DE',{maximumSignificantDigits:2});
-    });
-
-    Handlebars.registerHelper("nl2br",(string) => {
-        return string;
-    });
-
 </script>
 </body>
 </html>

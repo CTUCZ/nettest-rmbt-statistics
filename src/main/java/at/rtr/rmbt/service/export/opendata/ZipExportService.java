@@ -19,9 +19,9 @@ import java.util.zip.ZipOutputStream;
 
 @Service
 public class ZipExportService extends CsvExportService {
-    private static final String FILENAME_ZIP_HOURS = "netztest-opendata_hours-%HOURS%.zip";
-    private static final String FILENAME_ZIP = "netztest-opendata-%YEAR%-%MONTH%.zip";
-    private static final String FILENAME_ZIP_CURRENT = "netztest-opendata.zip";
+    private static final String FILENAME_ZIP_HOURS = OPENDATA_FILENAME_PREFIX + "_hours-%HOURS%.zip";
+    private static final String FILENAME_ZIP = OPENDATA_FILENAME_PREFIX + "-%YEAR%-%MONTH%.zip";
+    private static final String FILENAME_ZIP_CURRENT = OPENDATA_FILENAME_PREFIX + ".zip";
 
     private final ResourceLoader resourceLoader;
 

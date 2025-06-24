@@ -6,15 +6,25 @@ import com.github.jknack.handlebars.Options;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Handlebars including some helpers
  */
 public class ExtendedHandlebars extends Handlebars {
+
+    private static final DateTimeFormatter LOCAL_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    private static final DateTimeFormatter UTC_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC"));
 
     public ExtendedHandlebars() {
         super();
@@ -263,6 +273,43 @@ public class ExtendedHandlebars extends Handlebars {
                 return new SafeString(sText);
             }
         });
+
+        // Helper {{removeFirst text}} Removes first character from text
+        this.registerHelper("removeFirst", (Helper<String>) (text, options) ->
+            Optional.ofNullable(text)
+                .map(s -> s.substring(1))
+                .orElse("")
+        );
+
+        this.registerHelper("toLocalFormat", (Helper<String>) (text, options) ->
+            Optional.ofNullable(text)
+                .map(UTC_DATETIME_FORMATTER::parse)
+                .map(LOCAL_DATETIME_FORMATTER::format)
+                .orElse(""));
+
+        this.registerHelper("toLocalTime", (Helper<String>) (text, options) ->
+            Optional.ofNullable(text)
+                .map(UTC_DATETIME_FORMATTER::parse)
+                .map(ZonedDateTime::from)
+                .map(dateTime -> dateTime.withZoneSameInstant(ZoneId.of("Europe/Prague")))
+                .map(LOCAL_DATETIME_FORMATTER::format)
+                .orElse("")
+        );
+
+        this.registerHelper("boolToText", (Helper<String>) (text, options) ->
+            Optional.ofNullable(text)
+                .map(s -> s.equalsIgnoreCase("t") ? "Ano" : "Ne")
+                .orElse("Ne")
+        );
+
+        this.registerHelper("roundUp", (number, options) ->
+            Optional.ofNullable(number)
+                .map(Object::toString)
+                .map(BigDecimal::new)
+                .map(n -> n.setScale(0, RoundingMode.UP))
+                .map(BigDecimal::toPlainString)
+                .orElse("")
+        );
     }
 
 }

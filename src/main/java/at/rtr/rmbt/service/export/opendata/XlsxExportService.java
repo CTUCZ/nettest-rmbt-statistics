@@ -29,9 +29,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class XlsxExportService extends AbstractExportService {
 
-    private static final String FILENAME_XLSX_HOURS = "netztest-opendata_hours-%HOURS%.xlsx";
-    private static final String FILENAME_XLSX = "netztest-opendata-%YEAR%-%MONTH%.xlsx";
-    private static final String FILENAME_XLSX_CURRENT = "netztest-opendata.xlsx";
+    private static final String FILENAME_XLSX_HOURS = OPENDATA_FILENAME_PREFIX + "_hours-%HOURS%.xlsx";
+    private static final String FILENAME_XLSX = OPENDATA_FILENAME_PREFIX + "-%YEAR%-%MONTH%.xlsx";
+    private static final String FILENAME_XLSX_CURRENT = OPENDATA_FILENAME_PREFIX + ".xlsx";
 
     public XlsxExportService(OpenTestExportRepository openTestExportRepository,
                              OpenTestMapper openTestMapper,

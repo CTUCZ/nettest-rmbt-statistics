@@ -3,11 +3,14 @@ package at.rtr.rmbt.service.export.pdf.impl;
 import at.rtr.rmbt.constant.Constants;
 import at.rtr.rmbt.exception.InvalidRequestParameterException;
 import at.rtr.rmbt.repository.OpenTestRepository;
+import at.rtr.rmbt.repository.RadioSignalRepository;
 import at.rtr.rmbt.response.OpenTestDetailsDTO;
+import at.rtr.rmbt.response.SignalValidationRuleDTO;
 import at.rtr.rmbt.response.opentest.OpenTestDTO;
 import at.rtr.rmbt.response.opentest.OpenTestSearchResponse;
 import at.rtr.rmbt.service.FileService;
 import at.rtr.rmbt.service.UuidGenerator;
+import at.rtr.rmbt.service.export.validator.MobileCertifiedMeasurementValidator;
 import at.rtr.rmbt.service.export.pdf.PdfExportService;
 import at.rtr.rmbt.service.export.pdf.PdfGenerator;
 import at.rtr.rmbt.utils.ConvertUtils;
@@ -15,7 +18,7 @@ import at.rtr.rmbt.utils.ExtendedHandlebars;
 import at.rtr.rmbt.utils.QueryParser;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.google.common.base.Charsets;
+
 import com.google.common.base.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -53,6 +57,7 @@ public class PdfExportServiceImpl implements PdfExportService {
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
     private final FileService fileService;
+    private final RadioSignalRepository radioSignalRepository;
 
     @Value("${app.fileCache.pdfPath}")
     private String pdfPath;
@@ -70,11 +75,15 @@ public class PdfExportServiceImpl implements PdfExportService {
             String html;
             if (parameters.size() > 1 && !Strings.isNullOrEmpty(parameters.getFirst("first"))) {
                 //use different template for certified measurement protocol
-                html = com.google.common.io.Resources.toString(getClass().getClassLoader().getResource("export/export_zert.hbs.html"), Charsets.UTF_8);
+                html = com.google.common.io.Resources.toString(getClass().getClassLoader().getResource("export/export_zert.hbs.html"), StandardCharsets.UTF_8);
+                pdfFilename = labels.getString("RESULT_PDF_FILENAME_CERTIFIED");
+                certifiedMeasurement = true;
+            } else if (parameters.size() > 1 && !Strings.isNullOrEmpty(parameters.getFirst("mobile"))) {
+                html = com.google.common.io.Resources.toString(getClass().getClassLoader().getResource("export/export_zert_mobile.hbs.html"), StandardCharsets.UTF_8);
                 pdfFilename = labels.getString("RESULT_PDF_FILENAME_CERTIFIED");
                 certifiedMeasurement = true;
             } else {
-                html = com.google.common.io.Resources.toString(getClass().getClassLoader().getResource("export/export.hbs.html"), Charsets.UTF_8);
+                html = com.google.common.io.Resources.toString(getClass().getClassLoader().getResource("export/export.hbs.html"), StandardCharsets.UTF_8);
                 pdfFilename = labels.getString("RESULT_PDF_FILENAME");
                 certifiedMeasurement = false;
             }
@@ -137,7 +146,17 @@ public class PdfExportServiceImpl implements PdfExportService {
         while (testIterator.hasNext()) {
             OpenTestDTO result = testIterator.next();
             OpenTestDetailsDTO singleTest = openTestRepository.getOpenTestByUuid(ConvertUtils.formatOpenTestUuid(result.getOpenTestUuid()));
+            final var signalData = radioSignalRepository.getSignalData(ConvertUtils.formatOpenTestUuid(result.getOpenTestUuid()));
+            singleTest.setSignalList(signalData);
+            singleTest.setTranslatedStatus(translateStatus(singleTest.getStatus(), language));
             testIterator.set(singleTest);
+        }
+
+        if(parameters.size() > 1 && !Strings.isNullOrEmpty(parameters.getFirst("mobile"))) {
+            Map<String, Object> validationResult = validateMobileMeasurements(testResults, radioSignalRepository.getSignalValidationRules());
+            data.put("first", "y");
+            data.put("valid", validationResult.isEmpty());
+            data.putAll(validationResult);
         }
 
         addLogoPngFile(data);
@@ -261,5 +280,23 @@ public class PdfExportServiceImpl implements PdfExportService {
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(Files.readAllBytes(pdfTarget));
         }
+    }
+
+    private String translateStatus(String status, String lang) {
+        if(lang.equals("cs")) {
+            return switch (status) {
+                case "FINISHED" -> "DOKONČENO";
+                case "ABORTED" -> "PŘERUŠENO";
+                default -> "CHYBA";
+            };
+        }
+
+        return status;
+    }
+
+    private Map<String, Object> validateMobileMeasurements(List<OpenTestDTO> testResults, List<SignalValidationRuleDTO> rules) {
+        final var validator = new MobileCertifiedMeasurementValidator(testResults, rules);
+        validator.validate();
+        return validator.getValidationResults();
     }
 }

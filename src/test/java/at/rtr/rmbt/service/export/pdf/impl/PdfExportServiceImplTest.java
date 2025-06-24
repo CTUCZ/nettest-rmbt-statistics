@@ -4,6 +4,7 @@ import at.rtr.rmbt.TestConstants;
 import at.rtr.rmbt.TestUtils;
 import at.rtr.rmbt.constant.Constants;
 import at.rtr.rmbt.repository.OpenTestRepository;
+import at.rtr.rmbt.repository.RadioSignalRepository;
 import at.rtr.rmbt.response.OpenTestDetailsDTO;
 import at.rtr.rmbt.response.opentest.OpenTestDTO;
 import at.rtr.rmbt.response.opentest.OpenTestSearchResponse;
@@ -53,6 +54,8 @@ class PdfExportServiceImplTest {
     private Clock clock;
     @Mock
     private FileService fileService;
+    @Mock
+    private RadioSignalRepository radioSignalRepository;
     @InjectMocks
     private PdfExportServiceImpl pdfExportService;
 
@@ -96,6 +99,7 @@ class PdfExportServiceImplTest {
                 .thenReturn(openTestSearchResponse);
         when(resourceLoader.getResource(anyString())).thenReturn(resource);
         when(resource.getInputStream()).thenThrow(new IOException());
+        when(radioSignalRepository.getSignalData(any())).thenReturn(List.of());
 
         var actualResult = pdfExportService.generatePdf("application/json", parameters, null);
 
