@@ -13,7 +13,7 @@ public interface RadioSignalRepository {
 
     List<SignalGraphItemDTO> getSignalsLegacy(UUID openTestUuid, long time);
 
-    List<SignalDTO> getSignalData(String openTestUuid);
+    List<SignalDTO> getSignalData(UUID openTestUuid);
 
     List<SignalValidationRuleDTO> getSignalValidationRules();
 }

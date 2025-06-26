@@ -67,7 +67,7 @@ public class RadioSignalRepositoryImpl implements RadioSignalRepository {
         return jdbcTemplate.query(preparedStatementCreator, preparedStatementSetter, resultSetExtractor);
     }
 
-    public List<SignalDTO> getSignalData(String openTestUuid) {
+    public List<SignalDTO> getSignalData(UUID openTestUuid) {
         String sql = "SELECT to_char(radio_signal.time AT TIME ZONE 'UTC', 'DD.MM.YYYY HH24:MI:SS') \"time\", radio_cell.location_id, radio_cell.area_code, radio_cell.primary_scrambling_code, radio_cell.channel_number, radio_signal.lte_rsrp, radio_signal.lte_rsrq, radio_signal.timing_advance, radio_signal.signal_strength,nt.name network_type, technology network_technology" +
                      " FROM radio_cell" +
                      " JOIN radio_signal ON radio_signal.cell_uuid = radio_cell.uuid" +
