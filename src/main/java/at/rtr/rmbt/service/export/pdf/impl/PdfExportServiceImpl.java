@@ -284,6 +284,9 @@ public class PdfExportServiceImpl implements PdfExportService {
 
     private String translateStatus(String status, String lang) {
         if(lang.equals("cs")) {
+            if(status == null) {
+                return "CHYBA";
+            }
             return switch (status) {
                 case "FINISHED" -> "DOKONČENO";
                 case "ABORTED" -> "PŘERUŠENO";
