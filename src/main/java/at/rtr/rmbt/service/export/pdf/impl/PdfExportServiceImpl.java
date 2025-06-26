@@ -146,7 +146,7 @@ public class PdfExportServiceImpl implements PdfExportService {
         while (testIterator.hasNext()) {
             OpenTestDTO result = testIterator.next();
             OpenTestDetailsDTO singleTest = openTestRepository.getOpenTestByUuid(ConvertUtils.formatOpenTestUuid(result.getOpenTestUuid()));
-            final var signalData = radioSignalRepository.getSignalData(UUID.fromString(result.getOpenTestUuid()));
+            final var signalData = radioSignalRepository.getSignalData(UUID.fromString(ConvertUtils.formatOpenTestUuid(result.getOpenTestUuid())));
             singleTest.setSignalList(signalData);
             singleTest.setTranslatedStatus(translateStatus(singleTest.getStatus(), language));
             testIterator.set(singleTest);
