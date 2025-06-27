@@ -5,7 +5,7 @@
 
     <!--<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">-->
     <meta charset="UTF-8">
-    <!--    <link rel="stylesheet" href="basecss.css"/> -->
+<!--    <link rel="stylesheet" href="basecss.css"/> -->
     <style>
         /*!
  * Generated using the Bootstrap Customizer (https://getbootstrap.com/docs/3.4/customize/)
@@ -116,7 +116,7 @@
 <body>
 <script type="text/x-handlebars" id="template">
     <div class="title-page">
-        <!--        <img class="rtr-logo-title" src="data:image/png;base64,{{logo}}" />-->
+<!--        <img class="rtr-logo-title" src="data:image/png;base64,{{logo}}" />-->
         <h1>{{ Lang.results_certified_measurement }}</h1>
         <p class="date">{{ Lang.generated_at }}: {{date}} ({{Lang.prague}})</p>
     </div>
@@ -128,7 +128,7 @@
             <li><a href="#test-details">3. {{ Lang.single_measurement_results }}</a></li>
             <ul>
                 {{#each tests}}
-                <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{time}}</a></li>
+                    <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{time}}</a></li>
                 {{/each}}
             </ul>
         </ul>
@@ -150,18 +150,19 @@
             </thead>
             <tbody>
             {{#each tests}}
-            <tr>
-                <th scope="row">{{add @index 1}}</th>
-                <td>{{time}}</td>
-                <td>{{open_test_uuid}}</td>
-                <td class="text-right">{{toMbit download_kbit}}</td>
-                <td class="text-right">{{toMbit upload_kbit}}</td>
-                <td class="text-right">{{twoSignificantDigits ping_ms}}</td>
-            </tr>
+                <tr>
+                    <th scope="row">{{add @index 1}}</th>
+                    <td>{{time}}</td>
+                    <td>{{open_test_uuid}}</td>
+                    <td class="text-right">{{toMbit download_kbit}}</td>
+                    <td class="text-right">{{toMbit upload_kbit}}</td>
+                    <td class="text-right">{{twoSignificantDigits ping_ms}}</td>
+                </tr>
             {{/each}}
             </tbody>
         </table>
 
+        <p>{{ Lang.note_timestamp }}</p>
         {{#if loop_uuid}}
         <p>{{ Lang.results_url }}:<br/>
             <a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}</a>
@@ -172,129 +173,136 @@
     <div class="user-details" id="user-details">
         <h2>{{ Lang.user_provided_data }}</h2>
         <div class="detail">
-            {{#if title_prepend}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.title_prepended }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{title_prepend}}
-                </p>
-            </div>
-            {{/if}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.first_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{first_name}}
-                </p>
-            </div>
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.last_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{last_name}}
-                </p>
-            </div>
-            {{#if title_prepend}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.title_appended }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{title_append}}
-                </p>
-            </div>
-            {{/if}}
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.measurement_location }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{nl2br address}}
-                </p>
-            </div>
-            <!-- <div class="row">
-               <p class="col-xs-4 text-right">
-                   <strong>Zyklus</strong>
-               </p>
-               <p class="col-xs-8">
-                   {{#ifCond first '==' 'y'}}
-                   Erster Messzyklus
-                   {{/ifCond}}
-                   {{#ifCond first '==' 'n'}}
-                   Folgezyklus
-                   {{/ifCond}}
-               </p>
-            </div> -->
-        </div>
-        {{#ifCond first '==' 'y'}}
-        <div class="detail">
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.provider_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{ isp_name }}
-                </p>
-            </div>
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.provider_service_name }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{ isp_service_name }}
-                </p>
-            </div>
-            <div class="row">
-                <p class="col-xs-4 text-right">
-                    <strong>{{ Lang.provider_contract_number }}</strong>
-                </p>
-                <p class="col-xs-8">
-                    {{ isp_contract_number }}
-                </p>
-            </div>
-        </div>
+        {{#if title_prepend}}
         <div class="row">
             <p class="col-xs-4 text-right">
-                <strong>{{ Lang.provider_speed }}</strong>
+                <strong>{{ Lang.title_prepended }}</strong>
             </p>
             <p class="col-xs-8">
-                {{ isp_speed }}
+                {{title_prepend}}
             </p>
+         </div>
+         {{/if}}
+        <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.first_name }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{first_name}}
+            </p>
+         </div>
+         <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.last_name }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{last_name}}
+            </p>
+         </div>
+         {{#if title_prepend}}
+        <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.title_appended }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{title_append}}
+            </p>
+         </div>
+         {{/if}}
+         <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.measurement_location }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{nl2br address}}
+            </p>
+         </div>
+         <!-- <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>Zyklus</strong>
+            </p>
+            <p class="col-xs-8">
+                {{#ifCond first '==' 'y'}}
+                Erster Messzyklus
+                {{/ifCond}}
+                {{#ifCond first '==' 'n'}}
+                Folgezyklus
+                {{/ifCond}}
+            </p>
+         </div> -->
         </div>
+       {{#ifCond first '==' 'y'}}
+       <div class="detail">
+         <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.provider_name }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{ isp_name }}
+            </p>
+         </div>
+           <div class="row">
+               <p class="col-xs-4 text-right">
+                   <strong>{{ Lang.provider_service_name }}</strong>
+               </p>
+               <p class="col-xs-8">
+                   {{ isp_service_name }}
+               </p>
+           </div>
+           <div class="row">
+               <p class="col-xs-4 text-right">
+                   <strong>{{ Lang.provider_contract_number }}</strong>
+               </p>
+               <p class="col-xs-8">
+                   {{ isp_contract_number }}
+               </p>
+           </div>
+           <div class="row">
+               <p class="col-xs-4 text-right">
+                   <strong>{{ Lang.provider_adv_speed }}</strong>
+               </p>
+               <p class="col-xs-8">
+                   {{ isp_adv_speed }}
+               </p>
+           </div>
+           <div class="row">
+               <p class="col-xs-4 text-right">
+                   <strong>{{ Lang.provider_norm_speed }}</strong>
+               </p>
+               <p class="col-xs-8">
+                   {{ isp_norm_speed }}
+               </p>
+           </div>
 
         {{#if type_text}}
-        <div class="row">
+         <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.access_type }}</strong>
             </p>
             <p class="col-xs-8">
                 {{nl2br type_text}}
             </p>
-        </div>
-        {{/if}}
+         </div>
+         {{/if}}
 
-        {{#if test_device}}
-        <div class="row">
+         {{#if test_device}}
+         <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.test_device }}</strong>
             </p>
             <p class="col-xs-8">
                 {{nl2br test_device}}
             </p>
+         </div>
+         {{/if}}
+
         </div>
-        {{/if}}
 
-    </div>
-
-    {{#if test_picturesArr}}
-    <div class="">
+        {{#if test_picturesArr}}
+        <div class="">
         {{#each test_picturesArr}}
         <div class="row detail">
-            <p class="col-xs-2 text-right">
+             <p class="col-xs-2 text-right">
                 <strong>{{ Lang.photo_upload }}</strong>
             </p>
             <p class="col-xs-9">
@@ -302,8 +310,8 @@
             </p>
         </div>
         {{/each}}
-    </div>
-    {{/if}}
+        </div>
+        {{/if}}
     {{#if test_pictures}}
     <div class="">
         <div class="row detail">
@@ -587,40 +595,40 @@
 
 
     fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/search?loop_uuid=' + loop_uuid)
-        .then(response => {
-            return response.json()
-        })
-        .then(tests => {
-            return Promise.all(
-                tests.results.map(test => {
-                                      return fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/' + test.open_test_uuid)
-                                          .then(response => {
-                                              return response.json();
-                                          })
-                                          .then(test => {
-                                              test.Lang = Lang;
-                                              allData.push(test);
-                                          })
-                                  }
-                ))
-        })
+            .then(response => {
+                return response.json()
+            })
+            .then(tests => {
+                return Promise.all(
+                        tests.results.map(test => {
+                                    return fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/' + test.open_test_uuid)
+                                            .then(response => {
+                                                return response.json();
+                                            })
+                                            .then(test => {
+                                                test.Lang = Lang;
+                                                allData.push(test);
+                                            })
+                                }
+                        ))
+            })
 
-        .then(done => {
-            //fill model
-            let model = {
-                tests: allData,
-                loop_uuid: loop_uuid,
-                date: (new Date()).toLocaleString(),
-                Lang: Lang
-            };
+    .then(done => {
+        //fill model
+        let model = {
+            tests: allData,
+            loop_uuid: loop_uuid,
+            date: (new Date()).toLocaleString(),
+            Lang: Lang
+        };
 
-            var template = Handlebars.compile(document.querySelector("#template").innerHTML);
-            var html = template(model);
+        var template = Handlebars.compile(document.querySelector("#template").innerHTML);
+        var html = template(model);
 
-            window.setTimeout(function() {
-                document.getElementsByTagName("body")[0].innerHTML = html;
-            }, 0);
-        })
+        window.setTimeout(function() {
+            document.getElementsByTagName("body")[0].innerHTML = html;
+        }, 0);
+    })
 
 
 
