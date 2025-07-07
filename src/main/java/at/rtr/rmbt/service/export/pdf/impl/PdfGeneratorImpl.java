@@ -34,9 +34,6 @@ public class PdfGeneratorImpl implements PdfGenerator {
                 .push(new JacksonAwareSnakeCaseJavaBeanResolver())
                 .build();
 
-        log.info("Html template: {}", template.text());
-        log.info("Html template context: {}", context.toString());
-
         String fullTemplate = template.apply(context);
         fullTemplate = fullTemplate.replace("<script type=\"text/x-handlebars\" id=\"template\">", "");
 
