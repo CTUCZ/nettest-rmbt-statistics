@@ -42,7 +42,7 @@ public class PdfExportController {
                             schema = @Schema(type = "string"),
                             in = ParameterIn.QUERY)
             })
-    @GetMapping(URIConstants.EXPORT_PDF_FILENAME)
+    @RequestMapping(value = URIConstants.EXPORT_PDF_FILENAME, method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Object> getExportPdf(@PathVariable String fileName) {
         return pdfExportService.loadPdf(fileName, null);
     }
@@ -60,7 +60,7 @@ public class PdfExportController {
                             schema = @Schema(type = "string"),
                             in = ParameterIn.QUERY)
             })
-    @GetMapping(URIConstants.EXPORT_PDF_LANG_FILENAME)
+    @RequestMapping(value = URIConstants.EXPORT_PDF_LANG_FILENAME, method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Object> getExportPdfLang(@PathVariable String fileName, @PathVariable String lang) {
         return pdfExportService.loadPdf(fileName, lang);
     }
@@ -78,12 +78,12 @@ public class PdfExportController {
                             schema = @Schema(type = "string"),
                             in = ParameterIn.QUERY)
             })
-    @PostMapping(URIConstants.EXPORT_PDF)
+    @RequestMapping(value = URIConstants.EXPORT_PDF, method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Object> postExportPdf(@RequestHeader("accept") String acceptHeader,
                                                 @Parameter(hidden = true) @RequestParam MultiValueMap<String, String> parameters,
                                                 HttpServletRequest request) throws ServletException, IOException {
         //handle multipart forms
-        if (request.getParts().size() > 1) {
+        if (request.getParts() != null && request.getParts().size() > 1) {
             ControllerUtils.addParametersFromMultipartRequest(parameters, request);
         }
         return pdfExportService.generatePdf(acceptHeader, parameters, null);
@@ -102,13 +102,13 @@ public class PdfExportController {
                             schema = @Schema(type = "string"),
                             in = ParameterIn.QUERY)
             })
-    @PostMapping(URIConstants.EXPORT_PDF_LANG)
+    @RequestMapping(value = URIConstants.EXPORT_PDF_LANG, method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Object> postExportPdfLang(@PathVariable String lang,
                                                     @RequestHeader("accept") String acceptHeader,
                                                     @Parameter(hidden = true) @RequestParam MultiValueMap<String, String> parameters,
                                                     HttpServletRequest request) throws ServletException, IOException {
         //handle non-multipart form
-        if (request.getContentType().toLowerCase().startsWith("multipart")) {
+        if (request.getContentType() != null && request.getContentType().toLowerCase().startsWith("multipart")) {
             //handle multipart forms
             if (request.getParts().size() > 1) {
                 ControllerUtils.addParametersFromMultipartRequest(parameters, request);
