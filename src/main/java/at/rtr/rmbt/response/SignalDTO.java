@@ -26,7 +26,7 @@ public class SignalDTO {
     @JsonProperty("lte_rsrp")
     private Integer lteRsrp;
     @JsonProperty("lte_rsrq")
-    private Integer lterRsrq;
+    private Integer lteRsrq;
     @JsonProperty("signal_strength")
     private Integer signalStrength;
     @JsonProperty("timing_advance")
@@ -45,19 +45,22 @@ public class SignalDTO {
         }
     }
 
+
     @Override
     public String toString() {
         return new StringJoiner(", ", SignalDTO.class.getSimpleName() + "[", "]")
-                .add("time='" + time + "'")
-                .add("locationId=" + locationId)
-                .add("areaCode=" + areaCode)
-                .add("primaryScramblingCode=" + primaryScramblingCode)
-                .add("channelNumber=" + channelNumber)
-                .add("lteRsrp=" + lteRsrp)
-                .add("lterRsrq=" + lterRsrq)
-                .add("timingAdvance=" + timingAdvance)
-                .add("networkType='" + networkType + "'")
-                .add("networkTechnology='" + networkTechnology + "'")
+                .add("time='" + getTime() + "'")
+                .add("locationId=" + getLocationId())
+                .add("areaCode=" + getAreaCode())
+                .add("primaryScramblingCode=" + getPrimaryScramblingCode())
+                .add("channelNumber=" + getChannelNumber())
+                .add("lteRsrp=" + getLteRsrp())
+                .add("lterRsrq=" + getLteRsrq())
+                .add("signalStrength=" + getSignalStrength())
+                .add("timingAdvance=" + getTimingAdvance())
+                .add("networkType='" + getNetworkType() + "'")
+                .add("networkTechnology='" + getNetworkTechnology() + "'")
+                .add("conditionedSignalStrength=" + getConditionedSignalStrength())
                 .toString();
     }
 }
