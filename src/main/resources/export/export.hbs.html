@@ -165,7 +165,7 @@
     <div class="test-details" id="test-details">
         {{#each tests}}
         <div class="single-test">
-            <h2 id="{{open_test_uuid}}" >{{ Lang.measurement }} {{#if items.[1]}}{{add @index 1}}{{else}}{{/if}}</h2>
+            <h2 id="{{open_test_uuid}}" >{{ Lang.measurement }} {{#if ../tests.[1]}}{{add @index 1}}{{else}}{{/if}}</h2>
             <h3>{{ Lang.result }}</h3>
             <table class="table table-striped">
                 <colgroup>
