@@ -130,13 +130,13 @@
     <div class="title-page">
 <!--        <img class="rtr-logo-title" src="data:image/png;base64,{{logo}}" />-->
         <h1>{{ Lang.results_certified_measurement }}</h1>
-        <p class="date">{{ Lang.generated_at }}: {{date}}</p>
+        <p class="date">{{ Lang.generated_at }}: {{date}} ({{Lang.prague}})</p>
     </div>
     <div class="toc">
         <h2>{{ Lang.table_of_contents }}</h2>
         <ul>
             <li><a href="#test-list">1. {{ Lang.conducted_measurements }}</a></li>
-            <li><a href="#validation">2. Validace</a></li>
+            <li><a href="#validation">2. {{ Lang.validation }}</a></li>
             <li><a href="#test-details">3. {{ Lang.single_measurement_results }}</a></li>
             <ul>
                 {{#each tests}}
@@ -182,90 +182,90 @@
     </div>
 
     <div class="validation" id="validation">
-        <h2>Validace</h2>
+        <h2>{{ Lang.validation }}</h2>
         <p>
-            V této sekci jsou provedeny některé automatické kontroly výsledků měření, za účelem ověření, zda provedená měření odpovídají stanoveným podmínkám certifikovaného měření. Výsledkem kontroly je sdělení, jestli byly nebo nebyly detekovány v protokolu chyby a o jaké chyby se jedná.
+            {{ Lang.validation_desc }}
         </p>
         <div class="detail">
-            UUID certifikovaného měření: {{removeFirst loop_uuid}}
+            {{ Lang.validation_uuid }}: {{removeFirst loop_uuid}}
             <ul>
                 {{#each tests}}
-                <li>Měření {{add @index 1}} UUID: {{removeFirst open_test_uuid}}</li>
+                <li>{{ Lang.measurement }} {{add @index 1}} UUID: {{removeFirst open_test_uuid}}</li>
                 {{/each}}
             </ul>
         </div>
         <div class="detail">
             {{#if valid }}
-            <h3>V certifikovaném měření nebyly detekovány chyby</h3>
+            <h3>{{ Lang.validation_noerror }}</h3>
             {{else}}
-            <h3>V certifikovaném měření byly detekovány chyby</h3>
+            <h3>{{ Lang.validation_error }}</h3>
             {{#if invalidDistance }}
-            <h4>Vzdálenost od prvního testu</h4>
-            <p>Maximální povolená uražená vzdálenost mezi testy: {{ maxValidDistance }} metrů</p>
-            <p>Zdroj polohy: {{ validDistanceLocSrc }}</p>
+            <h4>{{ Lang.validation_distance }}</h4>
+            <p>{{ Lang.validation_distance_max }}: {{ maxValidDistance }} {{ Lang.validation_m }}</p>
+            <p>{{ Lang.validation_loc_src }}: {{ validDistanceLocSrc }}</p>
             <ul>
                 {{#each invalidDistance }}
-                <li>Měření č.{{ testId }}: {{ distance }} metrů<br/>{{ locSrc }}</li>
+                <li>{{ Lang.measurement }} #{{ testId }}: {{ distance }} {{ Lang.validation_m }}<br/>{{ locSrc }}</li>
                 {{/each}}
             </ul>
             {{/if}}
             {{#if invalidNumOfTests }}
-            <h4>Počet měření</h4>
-            <ul><li>Počet dokončených měření musí být 6, dokončených měření: {{ numOfFinishedTests }}</li></ul>
+            <h4>{{ Lang.validation_test_count }}</h4>
+            <ul><li>{{ Lang.validation_test_completed }}: {{ numOfFinishedTests }}</li></ul>
             {{/if}}
             {{#if invalidTime }}
-            <h4>Trvání měření</h4>
-            <ul><li>Měření trvalo déle než 60 minut. Počet minut trvání: {{ invalidTime }}</li></ul>
+            <h4>{{ Lang.validation_test_duration }}</h4>
+            <ul><li>{{ Lang.validation_test_duration_note }}: {{ invalidTime }}</li></ul>
             {{/if}}
             {{#if invalidLocation}}
-            <h4>Určení polohy měření</h4>
+            <h4>{{ Lang.validation_loc }}</h4>
             <ul>
                 {{#each invalidLocation}}
-                <li>Měření č.{{this}} - chybí souřadnice</li>
+                <li>{{ Lang.measurement }} {{this}} - {{ Lang.validation_loc_missing }}</li>
                 {{/each}}
             </ul>
             {{/if}}
             {{#if invalidNetwork}}
-            <h4>Typ sítě</h4>
-            <p>Měření nebyla provedena v mobilní síti</p>
+            <h4>{{ Lang.network_type }}</h4>
+            <p>{{ Lang.validation_network }}</p>
             <ul>
-                <li>Měření nebyla provedena v mobilní síti</li>
+                <li>{{ Lang.validation_network }}</li>
                 <ul>
                     {{#each invalidNetwork}}
-                    <li>Měření č.{{testNum}} - {{networkType}}</li>
+                    <li>{{ Lang.measurement }} #{{testNum}} - {{networkType}}</li>
                     {{/each}}
                 </ul>
             </ul>
             {{/if}}
             {{#if invalidMcc }}
-            <h4>Zařízení bylo v průběhu měření připojeno do sítě mimo Českou republiku</h4>
+            <h4>{{ Lang.validation_roaming }}</h4>
             <ul>
                 {{#each invalidMcc }}
-                <li>Měření č.{{ testNum }} - {{mcc}}</li>
+                <li>{{ Lang.measurement }} #{{ testNum }} - {{mcc}}</li>
                 {{/each}}
             </ul>
             {{/if}}
             {{#if invalidSimOperator }}
-            <h4>Bylo zjištěno, že SIM kód operátora není stejný jako kód sítě operátora</h4>
+            <h4>{{ Lang.validation_sim }}</h4>
             <ul>
                 {{#each invalidSimOperator }}
-                <li>Měření č.{{ testNum }} - operátor: {{networkMccMnc}}, sim: {{simMccMnc}}</li>
+                <li>{{ Lang.measurement }} #{{ testNum }} - {{ Lang.provider }}: {{networkMccMnc}}, sim: {{simMccMnc}}</li>
                 {{/each}}
             </ul>
             {{/if}}
             {{#if invalidSameNetwork}}
-            <h4>Měření nebyla provedena v síti jednoho operátora</h4>
+            <h4>{{ Lang.validation_provider }}</h4>
             <ul>
                 {{#each tests}}
-                <li>Měření č.{{add @index 1}} - {{network_mcc_mnc}}</li>
+                <li>{{ Lang.measurement }} #{{add @index 1}} - {{network_mcc_mnc}}</li>
                 {{/each}}
             </ul>
             {{/if}}
             {{#if invalidSignal }}
-            <h4>Slabý signál</h4>
+            <h4>{{ Lang.validation_signal }}</h4>
             <ul>
                 {{#each invalidSignal }}
-                <li>Měření č.{{ testId }}:
+                <li>{{ Lang.measurement }} #{{ testId }}:
                     <ul>
                         {{#each messages}}
                         <li>{{this}}</li>
@@ -278,11 +278,11 @@
             {{#if invalidRoaming }}
             <h4>Roaming</h4>
             <ul>
-                <li>Během měření by zařízení nemělo být připojeno přes roaming</li>
-                <li><h5>Typ roamingu</h5></li>
+                <li>{{ Lang.validation_roaming_note }}</li>
+                <li><h5>{{ Lang.validation_roaming_type }}</h5></li>
                 <ul>
                     {{#each invalidRoaming }}
-                    <li>Měření č.{{ testId }} typ roamingu: {{ roamingType }}, network type: {{ networkType }}</li>
+                    <li>{{ Lang.measurement }} #{{ testId }} {{ Lang.validation_roaming_type }}: {{ roamingType }}, {{ Lang.network_type }}: {{ networkType }}</li>
                     {{/each}}
                 </ul>
             </ul>
@@ -353,24 +353,24 @@
                 {{/if}}
                 <!-- location section -->
                 <tr>
-                    <td>Souřadnice</td><!-- TODO i18n -->
+                    <td>{{ Lang.location }}</td>
                     <td>{{this.lat}} {{this.long}}</td>
                 </tr>
                 <tr>
-                    <td>Poskytovatel souřadnice</td><!-- TODO i18n -->
+                    <td>{{ Lang.validation_loc_src }}</td>
                     <td>{{loc_src}}</td>
                 </tr>
                 <tr>
-                    <td>Přesnost polohy</td><!-- TODO i18n -->
-                    <td>{{roundUp loc_accuracy}} metrů</td>
+                    <td>{{ Lang.validation_loc_accuracy }}</td>
+                    <td>{{roundUp loc_accuracy}} {{ Lang.validation_m }}</td>
                 </tr>
                 <tr>
-                    <td>Pohyb v průběhu měření</td><!-- TODO i18n -->
-                    <td>{{roundUp distance}} metrů</td>
+                    <td>{{ Lang.validation_movement }}</td>
+                    <td>{{roundUp distance}} {{ Lang.validation_m }}</td>
                 </tr>
             </table>
             <p>
-                {{ Lang.result_detail_link }}: <br/><a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?O{{open_test_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?O{{open_test_uuid}}</a>
+                {{ Lang.result_detail_link }}: <br/><a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}</a>
             </p>
 
             <h3>{{ Lang.detailed_result }}</h3>
@@ -382,24 +382,24 @@
                 </colgroup>
                 <!-- ip section -->
                 <tr>
-                    <td>IP public</td><!-- TODO i18n -->
+                    <td>{{ Lang.client_public_ip }}</td>
                     <td>{{ip_public}}</td>
                 </tr>
                 <tr>
-                    <td>IP local</td><!-- TODO i18n -->
+                    <td>{{ Lang.client_local_ip }}</td>
                     <td>{{ip_local}}</td>
                 </tr>
                 <tr>
-                    <td>Název serveru</td><!-- TODO i18n -->
+                    <td>{{ Lang.server_name }}</td>
                     <td>{{server_name}}</td>
                 </tr>
                 <tr>
-                    <td>Adresa serveru</td><!-- TODO i18n -->
+                    <td>{{ Lang.server_ip }}</td>
                     <td>{{this.server_web_address}}</td>
                 </tr>
                 {{#if connection}}
                 <tr>
-                    <td>NAT</td><!-- TODO i18n -->
+                    <td>NAT</td>
                     <td>{{connection}}</td>
                 </tr>
                 {{/if}}
@@ -410,8 +410,7 @@
                 <!-- data section -->
                 {{#if time_dl_ms}}
                 <tr>
-                    <!--                                    <td>{{ Lang.time_dl_ms }}</td>-->
-                    <td>Začátek měření download</td><!-- TODO i18n -->
+                    <td>{{ Lang.time_dl_ms }}</td>
                     <td>{{roundNumber time_dl_ms 0}} ms</td>
                 </tr>
                 {{/if}}
@@ -429,8 +428,7 @@
                 {{/if}}
                 {{#if time_ul_ms}}
                 <tr>
-                    <!--                                    <td>{{ Lang.time_ul_ms }}</td>-->
-                    <td>Začátek měření upload</td><!-- TODO i18n -->
+                    <td>{{ Lang.time_ul_ms }}</td>
                     <td>{{roundNumber time_ul_ms 0}} ms</td>
                 </tr>
                 {{/if}}
@@ -448,19 +446,19 @@
                 {{/if}}
                 <!-- network section -->
                 <tr>
-                    <td>Kód sítě operátora</td><!-- TODO i18n -->
+                    <td>{{ Lang.validation_net_code }}</td>
                     <td>{{network_mcc_mnc}}</td>
                 </tr>
                 <tr>
-                    <td>Název sítě operátora</td><!-- TODO i18n -->
+                    <td>{{ Lang.validation_net_name }}</td>
                     <td>{{network_name}}</td>
                 </tr>
                 <tr>
-                    <td>SIM kód operátora</td><!-- TODO i18n -->
+                    <td>{{ Lang.validation_sim_code }}</td>
                     <td>{{sim_mcc_mnc}}</td>
                 </tr>
                 <tr>
-                    <td>SIM název operátora</td><!-- TODO i18n -->
+                    <td>{{ Lang.validation_sim_name }}</td>
                     <td>{{sim_operator_name}}</td>
                 </tr>
                 <!-- mobile section -->
@@ -469,7 +467,7 @@
                     <td>{{platform}}</td>
                 </tr>
                 <tr>
-                    <td>Verze systému</td><!-- TODO i18n -->
+                    <td>{{ Lang.os_version }}</td>
                     <td>{{os_version}}</td>
                 </tr>
                 <tr>
@@ -477,22 +475,22 @@
                     <td>{{model_native}}</td>
                 </tr>
                 <tr>
-                    <td>DUAL SIM</td><!-- TODO i18n -->
+                    <td>DUAL SIM</td>
                     <td>{{boolToText dual_sim}}</td>
                 </tr>
                 <tr>
-                    <td>Verze aplikace</td><!-- TODO i18n -->
+                    <td>{{ Lang.client_app_version }}</td>
                     <td>{{client_version}}</td>
                 </tr>
             </table>
 
             <div class="single-test">
-                <h3>Síla signálu (detail)</h3>
+                <h3>{{ Lang.signal_strength }} (detail)</h3>
                 <table class="table table-striped table-condensed">
                     <thead>
                     <tr style="font-weight: bold; font-size: smaller">
-                        <td>Čas</td>
-                        <td>LocationId</td>
+                        <td>Time</td>
+                        <td>Location ID</td>
                         <td>Area Code</td>
                         <td>Channel Number</td>
                         <td>RSRP</td>
