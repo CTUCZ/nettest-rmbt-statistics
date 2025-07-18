@@ -181,8 +181,10 @@
             <p class="col-xs-8">
                 {{title_prepend}}
             </p>
-         </div>
-         {{/if}}
+        </div>
+        {{/if}}
+
+        {{#if first_name}}
         <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.first_name }}</strong>
@@ -190,16 +192,21 @@
             <p class="col-xs-8">
                 {{first_name}}
             </p>
-         </div>
-         <div class="row">
+        </div>
+        {{/if}}
+
+        {{#if last_name}}
+        <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.last_name }}</strong>
             </p>
             <p class="col-xs-8">
                 {{last_name}}
             </p>
-         </div>
-         {{#if title_prepend}}
+        </div>
+        {{/if}}
+
+        {{#if title_append}}
         <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.title_appended }}</strong>
@@ -207,16 +214,17 @@
             <p class="col-xs-8">
                 {{title_append}}
             </p>
-         </div>
-         {{/if}}
-         <div class="row">
+        </div>
+        {{/if}}
+
+        <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.measurement_location }}</strong>
             </p>
             <p class="col-xs-8">
                 {{nl2br address}}
             </p>
-         </div>
+        </div>
          <!-- <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>Zyklus</strong>
@@ -232,86 +240,102 @@
          </div> -->
         </div>
        {{#ifCond first '==' 'y'}}
-       <div class="detail">
-         <div class="row">
+       
+        <div class="detail">
+        {{#if isp_name}}
+        <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.provider_name }}</strong>
             </p>
             <p class="col-xs-8">
                 {{ isp_name }}
             </p>
-         </div>
-           <div class="row">
-               <p class="col-xs-4 text-right">
-                   <strong>{{ Lang.provider_service_name }}</strong>
-               </p>
-               <p class="col-xs-8">
-                   {{ isp_service_name }}
-               </p>
-           </div>
-           <div class="row">
-               <p class="col-xs-4 text-right">
-                   <strong>{{ Lang.provider_contract_number }}</strong>
-               </p>
-               <p class="col-xs-8">
-                   {{ isp_contract_number }}
-               </p>
-           </div>
-           <div class="row">
-               <p class="col-xs-4 text-right">
-                   <strong>{{ Lang.provider_adv_speed }}</strong>
-               </p>
-               <p class="col-xs-8">
-                   {{ isp_adv_speed }}
-               </p>
-           </div>
-           <div class="row">
-               <p class="col-xs-4 text-right">
-                   <strong>{{ Lang.provider_norm_speed }}</strong>
-               </p>
-               <p class="col-xs-8">
-                   {{ isp_norm_speed }}
-               </p>
-           </div>
+        </div>
+        {{/if}}
+
+        {{#if isp_service_name}}
+        <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.provider_service_name }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{ isp_service_name }}
+            </p>
+        </div>
+        {{/if}}
+
+        {{#if isp_contract_number}}
+        <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.provider_contract_number }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{ isp_contract_number }}
+            </p>
+        </div>
+        {{/if}}
+
+        {{#if isp_adv_speed}}
+        <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.provider_adv_speed }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{ isp_adv_speed }}
+            </p>
+        </div>
+        {{/if}}
+
+        {{#if isp_norm_speed}}
+        <div class="row">
+            <p class="col-xs-4 text-right">
+                <strong>{{ Lang.provider_norm_speed }}</strong>
+            </p>
+            <p class="col-xs-8">
+                {{ isp_norm_speed }}
+            </p>
+        </div>
+        {{/if}}
 
         {{#if type_text}}
-         <div class="row">
-            <p class="col-xs-4 text-right">
+        <div class="row">
+           <p class="col-xs-4 text-right">
                 <strong>{{ Lang.access_type }}</strong>
             </p>
             <p class="col-xs-8">
                 {{nl2br type_text}}
             </p>
-         </div>
-         {{/if}}
+        </div>
+        {{/if}}
 
-         {{#if test_device}}
-         <div class="row">
+        {{#if test_device}}
+        <div class="row">
             <p class="col-xs-4 text-right">
                 <strong>{{ Lang.test_device }}</strong>
             </p>
             <p class="col-xs-8">
                 {{nl2br test_device}}
             </p>
-         </div>
-         {{/if}}
-
-        </div>
-
-        {{#if test_picturesArr}}
-        <div class="">
-        {{#each test_picturesArr}}
-        <div class="row detail">
-             <p class="col-xs-2 text-right">
-                <strong>{{ Lang.photo_upload }}</strong>
-            </p>
-            <p class="col-xs-9">
-                <img src="{{this}}" class="img-responsive" style="max-height:20cm" />
-            </p>
-        </div>
-        {{/each}}
         </div>
         {{/if}}
+
+    </div>
+
+    {{#if test_picturesArr}}
+    <div class="">
+    {{#each test_picturesArr}}
+    <div class="row detail">
+        <p class="col-xs-2 text-right">
+            <strong>{{ Lang.photo_upload }}</strong>
+        </p>
+        <p class="col-xs-9">
+            <img src="{{this}}" class="img-responsive" style="max-height:20cm" />
+        </p>
+    </div>
+    {{/each}}
+    </div>
+    {{/if}}
+    
     {{#if test_pictures}}
     <div class="">
         <div class="row detail">
