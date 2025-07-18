@@ -3,6 +3,7 @@ package at.rtr.rmbt.utils;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.Template;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.SneakyThrows;
+
 /**
  * Handlebars including some helpers
  */
@@ -28,6 +31,11 @@ public class ExtendedHandlebars extends Handlebars {
     private static final DateTimeFormatter UTC_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC"));
 
     private static final Logger log = LoggerFactory.getLogger(ExtendedHandlebars.class);
+
+    @SneakyThrows
+    public static Template getTemplate(String input) {
+        return new ExtendedHandlebars().compileInline(input);
+    }
 
     public ExtendedHandlebars() {
         super();
