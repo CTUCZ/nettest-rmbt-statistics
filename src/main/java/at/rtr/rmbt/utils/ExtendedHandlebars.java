@@ -284,12 +284,14 @@ public class ExtendedHandlebars extends Handlebars {
                 .orElse("")
         );
 
+        // Helper {{toLocalFormat text}} formats UTC time to european time format
         this.registerHelper("toLocalFormat", (Helper<String>) (text, options) ->
             Optional.ofNullable(text)
                 .map(UTC_DATETIME_FORMATTER::parse)
                 .map(LOCAL_DATETIME_FORMATTER::format)
                 .orElse(""));
 
+        // Helper {{toLocalTime text}} converts to Europe/Prague timezone and formats UTC time to european time format
         this.registerHelper("toLocalTime", (Helper<String>) (text, options) ->
             Optional.ofNullable(text)
                 .map(UTC_DATETIME_FORMATTER::parse)
@@ -299,10 +301,18 @@ public class ExtendedHandlebars extends Handlebars {
                 .orElse("")
         );
 
-        this.registerHelper("boolToText", (Helper<String>) (text, options) ->
-            Optional.ofNullable(text)
-                .map(s -> s.equalsIgnoreCase("t") ? "Ano" : "Ne")
-                .orElse("Ne")
+        // Helper {{translateBool text lang}} translates bool values "t" and "f" to words for "Yes" and "No" in specified language
+        this.registerHelper("translateBool", (Helper<String>) (text, options) -> {
+                                final var bool = Optional.ofNullable(text)
+                                    .map(s -> s.equalsIgnoreCase("t"))
+                                    .orElse(false);
+                                return switch (options.param(0, "en")) {
+                                    case "cs" -> bool ? "Ano" : "Ne";
+                                    case "de" -> bool ? "Ja" : "Nein";
+                                    case "pl" -> bool ? "Tak" : "Nie";
+                                    default -> bool ? "Yes" : "No";
+                                };
+                            }
         );
 
         this.registerHelper("roundUp", (number, options) ->

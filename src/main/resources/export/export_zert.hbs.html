@@ -128,7 +128,7 @@
             <li><a href="#test-details">3. {{ Lang.single_measurement_results }}</a></li>
             <ul>
                 {{#each tests}}
-                    <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{time}}</a></li>
+                    <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{toLocalFormat time}}</a></li>
                 {{/each}}
             </ul>
         </ul>
@@ -152,7 +152,7 @@
             {{#each tests}}
                 <tr>
                     <th scope="row">{{add @index 1}}</th>
-                    <td>{{time}}</td>
+                    <td>{{toLocalFormat time}}</td>
                     <td>{{open_test_uuid}}</td>
                     <td class="text-right">{{toMbit download_kbit}}</td>
                     <td class="text-right">{{toMbit upload_kbit}}</td>
@@ -351,7 +351,7 @@
                 </tr>
                 <tr>
                     <td>{{ Lang.time_utc }}</td>
-                    <td>{{time}}</td>
+                    <td>{{toLocalFormat time}}</td>
                 </tr>
                 <tr>
                     <td>{{ Lang.open_test_uuid }}</td>
