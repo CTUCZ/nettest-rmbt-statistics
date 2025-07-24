@@ -136,6 +136,7 @@ public class PdfExportServiceImpl implements PdfExportService {
 
         if(certifiedMeasurement) {
             data.put("first", "y");
+            data.putIfAbsent("address", firstTest.getCertTestAddress());
         }
 
         if(certifiedMeasurement && mobileMeasurement) {
