@@ -38,7 +38,7 @@ public class ZipExportService extends CsvExportService {
     @Override
     protected void writeCustomLogic(List<OpenTestExportDto> results, OutputStream out, String fileName) throws IOException {
         final ZipOutputStream zos = new ZipOutputStream(out);
-        final ZipEntry zeLicense = new ZipEntry("LIZENZ.txt");
+        final ZipEntry zeLicense = new ZipEntry("LICENSE.txt");
         zos.putNextEntry(zeLicense);
         final InputStream licenseIS = resourceLoader.getResource("classpath:png/DATA_LICENSE.txt").getInputStream();
         IOUtils.copy(licenseIS, zos);
