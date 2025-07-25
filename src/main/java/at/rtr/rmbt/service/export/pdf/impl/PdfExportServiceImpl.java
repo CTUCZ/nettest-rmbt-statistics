@@ -3,21 +3,24 @@ package at.rtr.rmbt.service.export.pdf.impl;
 import at.rtr.rmbt.constant.Constants;
 import at.rtr.rmbt.exception.InvalidRequestParameterException;
 import at.rtr.rmbt.repository.OpenTestRepository;
+import at.rtr.rmbt.repository.RadioSignalRepository;
 import at.rtr.rmbt.response.OpenTestDetailsDTO;
+import at.rtr.rmbt.response.SignalValidationRuleDTO;
 import at.rtr.rmbt.response.opentest.OpenTestDTO;
 import at.rtr.rmbt.response.opentest.OpenTestSearchResponse;
 import at.rtr.rmbt.service.FileService;
 import at.rtr.rmbt.service.UuidGenerator;
+import at.rtr.rmbt.service.export.validator.MobileCertifiedMeasurementValidator;
 import at.rtr.rmbt.service.export.pdf.PdfExportService;
 import at.rtr.rmbt.service.export.pdf.PdfGenerator;
 import at.rtr.rmbt.utils.ConvertUtils;
 import at.rtr.rmbt.utils.ExtendedHandlebars;
 import at.rtr.rmbt.utils.QueryParser;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
-import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
+
+import com.google.common.io.Resources;
+
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -53,37 +57,13 @@ public class PdfExportServiceImpl implements PdfExportService {
     private final UuidGenerator uuidGenerator;
     private final Clock clock;
     private final FileService fileService;
+    private final RadioSignalRepository radioSignalRepository;
 
     @Value("${app.fileCache.pdfPath}")
     private String pdfPath;
 
     @Override
     public ResponseEntity<Object> generatePdf(String acceptHeader, MultiValueMap<String, String> parameters, String lang) {
-        String language = getCurrentLanguage(lang);
-        ResourceBundle labels = ResourceBundle.getBundle("SystemMessages", new Locale(language));
-        //load template
-        String pdfFilename = labels.getString("RESULT_PDF_FILENAME");
-        Handlebars handlebars = new ExtendedHandlebars();
-        Template template = null;
-        boolean certifiedMeasurement;
-        try {
-            String html;
-            if (parameters.size() > 1 && !Strings.isNullOrEmpty(parameters.getFirst("first"))) {
-                //use different template for certified measurement protocol
-                html = com.google.common.io.Resources.toString(getClass().getClassLoader().getResource("export/export_zert.hbs.html"), Charsets.UTF_8);
-                pdfFilename = labels.getString("RESULT_PDF_FILENAME_CERTIFIED");
-                certifiedMeasurement = true;
-            } else {
-                html = com.google.common.io.Resources.toString(getClass().getClassLoader().getResource("export/export.hbs.html"), Charsets.UTF_8);
-                pdfFilename = labels.getString("RESULT_PDF_FILENAME");
-                certifiedMeasurement = false;
-            }
-            template = handlebars.compileInline(html);
-        } catch (IOException e) {
-            e.printStackTrace();
-            certifiedMeasurement = false;
-        }
-
         final QueryParser qp = new QueryParser();
         //parse the input query
         final List<String> invalidElements = qp.parseQuery(parameters);
@@ -98,7 +78,11 @@ public class PdfExportServiceImpl implements PdfExportService {
 
         OpenTestSearchResponse searchResult = openTestRepository.getOpenTestSearchResults(qp, 0, MAX_RESULTS, new HashSet<>());
 
-        Map<String, Object> data = new HashMap<>();
+        //if no measurements - don't generate the application
+        if (searchResult.getResults() == null || searchResult.getResults().isEmpty()) {
+            return ResponseEntity.notFound()
+                .build();
+        }
 
         //date handling
         Date generationDate = new Date(clock.instant().toEpochMilli());
@@ -107,6 +91,8 @@ public class PdfExportServiceImpl implements PdfExportService {
         SimpleDateFormat filenameDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.GERMAN);
         filenameDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Vienna"));
         String filenameDatePart = filenameDateFormat.format(generationDate);
+
+        final Map<String, Object> data = new HashMap<>();
         data.put("date", sdf.format(generationDate));
 
         //make tests accessible to handlebars
@@ -126,18 +112,37 @@ public class PdfExportServiceImpl implements PdfExportService {
             }
         });
 
-        //if no measurements - don't generate the application
-        if (searchResult.getResults() == null || searchResult.getResults().isEmpty()) {
-            return ResponseEntity.notFound()
-                    .build();
-        }
-
+        final var language = getCurrentLanguage(lang);
+        OpenTestDetailsDTO firstTest = null;
         //get details for single results - set more detailled info
         ListIterator<OpenTestDTO> testIterator = testResults.listIterator();
         while (testIterator.hasNext()) {
             OpenTestDTO result = testIterator.next();
             OpenTestDetailsDTO singleTest = openTestRepository.getOpenTestByUuid(ConvertUtils.formatOpenTestUuid(result.getOpenTestUuid()));
+            final var signalData = radioSignalRepository.getSignalData(UUID.fromString(ConvertUtils.formatOpenTestUuid(result.getOpenTestUuid())));
+            singleTest.setSignalList(signalData);
+            singleTest.setTranslatedStatus(translateStatus(singleTest.getStatus(), language));
             testIterator.set(singleTest);
+            if(firstTest == null) {
+                firstTest = singleTest;
+            }
+        }
+
+        final var labels = ResourceBundle.getBundle("SystemMessages", new Locale(language));
+        final var certifiedMeasurement = Optional.ofNullable(firstTest).map(OpenTestDetailsDTO::getCertMode).orElse(false);
+        final var mobileMeasurement = Optional.ofNullable(firstTest).map(OpenTestDetailsDTO::isMobileMeasurement).orElse(false);
+        final var pdfFilename = certifiedMeasurement? labels.getString("RESULT_PDF_FILENAME_CERTIFIED") : labels.getString("RESULT_PDF_FILENAME");
+        final var template = ExtendedHandlebars.getTemplate(determineTemplate(certifiedMeasurement, mobileMeasurement));
+
+        if(certifiedMeasurement) {
+            data.put("first", "y");
+            data.putIfAbsent("address", firstTest.getCertTestAddress());
+        }
+
+        if(certifiedMeasurement && mobileMeasurement) {
+            Map<String, Object> validationResult = validateMobileMeasurements(testResults, radioSignalRepository.getSignalValidationRules());
+            data.put("valid", validationResult.isEmpty());
+            data.putAll(validationResult);
         }
 
         addLogoPngFile(data);
@@ -260,6 +265,38 @@ public class PdfExportServiceImpl implements PdfExportService {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + pdfFilename + "-" + filenameDatePart + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(Files.readAllBytes(pdfTarget));
+        }
+    }
+
+    private String translateStatus(String status, String lang) {
+        if(lang.equals("cs")) {
+            if(status == null) {
+                return "CHYBA";
+            }
+            return switch (status) {
+                case "FINISHED" -> "DOKONČENO";
+                case "ABORTED" -> "PŘERUŠENO";
+                default -> "CHYBA";
+            };
+        }
+
+        return status;
+    }
+
+    private Map<String, Object> validateMobileMeasurements(List<OpenTestDTO> testResults, List<SignalValidationRuleDTO> rules) {
+        final var validator = new MobileCertifiedMeasurementValidator(testResults, rules);
+        validator.validate();
+        return validator.getValidationResults();
+    }
+
+    @SneakyThrows
+    private String determineTemplate(boolean certifiedMeasurement, boolean isMobile) {
+        if(certifiedMeasurement && isMobile){
+            return Resources.toString(getClass().getClassLoader().getResource("export/export_zert_mobile.hbs.html"), StandardCharsets.UTF_8);
+        } else if (certifiedMeasurement && !isMobile) {
+            return Resources.toString(getClass().getClassLoader().getResource("export/export_zert.hbs.html"), StandardCharsets.UTF_8);
+        } else {
+            return Resources.toString(getClass().getClassLoader().getResource("export/export.hbs.html"), StandardCharsets.UTF_8);
         }
     }
 }

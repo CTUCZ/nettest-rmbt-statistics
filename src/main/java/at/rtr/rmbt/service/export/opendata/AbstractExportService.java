@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public abstract class AbstractExportService {
 
+    public static final String OPENDATA_FILENAME_PREFIX = "nettest-opendata";
+
     private final OpenTestExportRepository openTestExportRepository;
     private final OpenTestMapper openTestMapper;
     private final FileService fileService;

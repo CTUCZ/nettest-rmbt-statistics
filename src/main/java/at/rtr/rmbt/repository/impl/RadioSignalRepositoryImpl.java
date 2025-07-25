@@ -2,11 +2,15 @@ package at.rtr.rmbt.repository.impl;
 
 import at.rtr.rmbt.constant.Constants;
 import at.rtr.rmbt.repository.RadioSignalRepository;
+import at.rtr.rmbt.response.SignalDTO;
 import at.rtr.rmbt.response.SignalGraphItemDTO;
 import com.google.common.base.Strings;
+
+import at.rtr.rmbt.response.SignalValidationRuleDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -17,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 @Slf4j
@@ -60,6 +65,25 @@ public class RadioSignalRepositoryImpl implements RadioSignalRepository {
         PreparedStatementSetter preparedStatementSetter = getPreparedStatementSetter(openTestUuid);
         ResultSetExtractor<List<SignalGraphItemDTO>> resultSetExtractor = getResultSetExtractorLegacy(time);
         return jdbcTemplate.query(preparedStatementCreator, preparedStatementSetter, resultSetExtractor);
+    }
+
+    public List<SignalDTO> getSignalData(UUID openTestUuid) {
+        String sql = "SELECT to_char(radio_signal.time AT TIME ZONE 'UTC', 'DD.MM.YYYY HH24:MI:SS') \"time\", radio_cell.location_id, radio_cell.area_code, radio_cell.primary_scrambling_code, radio_cell.channel_number, radio_signal.lte_rsrp, radio_signal.lte_rsrq, radio_signal.timing_advance, radio_signal.signal_strength,nt.name network_type, technology network_technology" +
+                     " FROM radio_cell" +
+                     " JOIN radio_signal ON radio_signal.cell_uuid = radio_cell.uuid" +
+                     " JOIN network_type nt ON nt.uid = network_type_id" +
+                     " JOIN test on radio_signal.open_test_uuid = test.open_test_uuid " +
+                     " WHERE radio_signal.open_test_uuid = ? AND radio_cell.active = true AND (radio_cell.mcc || '-' || TO_CHAR(radio_cell.mnc, 'fm00')) = test.network_operator" +
+                     " ORDER BY radio_signal.time";
+
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(SignalDTO.class), openTestUuid);
+    }
+
+    @Override
+    public List<SignalValidationRuleDTO> getSignalValidationRules() {
+        final var sql = "SELECT * FROM signal_validation_rules";
+
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(SignalValidationRuleDTO.class));
     }
 
     private ResultSetExtractor<List<SignalGraphItemDTO>> getResultSetExtractorLegacy(long time) {

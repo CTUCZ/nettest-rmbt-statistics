@@ -17,9 +17,9 @@ import java.util.List;
 
 @Service
 public class CsvExportService extends AbstractExportService {
-    private static final String FILENAME_CSV_HOURS = "netztest-opendata_hours-%HOURS%.csv";
-    private static final String FILENAME_CSV = "netztest-opendata-%YEAR%-%MONTH%.csv";
-    private static final String FILENAME_CSV_CURRENT = "netztest-opendata.csv";
+    private static final String FILENAME_CSV_HOURS = OPENDATA_FILENAME_PREFIX + "_hours-%HOURS%.csv";
+    private static final String FILENAME_CSV = OPENDATA_FILENAME_PREFIX + "-%YEAR%-%MONTH%.csv";
+    private static final String FILENAME_CSV_CURRENT = OPENDATA_FILENAME_PREFIX + ".csv";
 
     public CsvExportService(OpenTestExportRepository openTestExportRepository,
                             OpenTestMapper openTestMapper,

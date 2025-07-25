@@ -3,18 +3,39 @@ package at.rtr.rmbt.utils;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.Template;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import lombok.SneakyThrows;
 
 /**
  * Handlebars including some helpers
  */
 public class ExtendedHandlebars extends Handlebars {
+
+    private static final DateTimeFormatter LOCAL_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    private static final DateTimeFormatter UTC_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC"));
+
+    private static final Logger log = LoggerFactory.getLogger(ExtendedHandlebars.class);
+
+    @SneakyThrows
+    public static Template getTemplate(String input) {
+        return new ExtendedHandlebars().compileInline(input);
+    }
 
     public ExtendedHandlebars() {
         super();
@@ -263,6 +284,53 @@ public class ExtendedHandlebars extends Handlebars {
                 return new SafeString(sText);
             }
         });
+
+        // Helper {{removeFirst text}} Removes first character from text
+        this.registerHelper("removeFirst", (Helper<String>) (text, options) ->
+            Optional.ofNullable(text)
+                .map(s -> s.substring(1))
+                .orElse("")
+        );
+
+        // Helper {{toLocalFormat text}} formats UTC time to european time format
+        this.registerHelper("toLocalFormat", (Helper<String>) (text, options) ->
+            Optional.ofNullable(text)
+                .map(UTC_DATETIME_FORMATTER::parse)
+                .map(LOCAL_DATETIME_FORMATTER::format)
+                .orElse(""));
+
+        // Helper {{toLocalTime text}} converts to Europe/Prague timezone and formats UTC time to european time format
+        this.registerHelper("toLocalTime", (Helper<String>) (text, options) ->
+            Optional.ofNullable(text)
+                .map(UTC_DATETIME_FORMATTER::parse)
+                .map(ZonedDateTime::from)
+                .map(dateTime -> dateTime.withZoneSameInstant(ZoneId.of("Europe/Prague")))
+                .map(LOCAL_DATETIME_FORMATTER::format)
+                .orElse("")
+        );
+
+        // Helper {{translateBool text lang}} translates bool values "t" and "f" to words for "Yes" and "No" in specified language
+        this.registerHelper("translateBool", (Helper<String>) (text, options) -> {
+                                final var bool = Optional.ofNullable(text)
+                                    .map(s -> s.equalsIgnoreCase("t"))
+                                    .orElse(false);
+                                return switch (options.param(0, "en")) {
+                                    case "cs" -> bool ? "Ano" : "Ne";
+                                    case "de" -> bool ? "Ja" : "Nein";
+                                    case "pl" -> bool ? "Tak" : "Nie";
+                                    default -> bool ? "Yes" : "No";
+                                };
+                            }
+        );
+
+        this.registerHelper("roundUp", (number, options) ->
+            Optional.ofNullable(number)
+                .map(Object::toString)
+                .map(BigDecimal::new)
+                .map(n -> n.setScale(0, RoundingMode.UP))
+                .map(BigDecimal::toPlainString)
+                .orElse("")
+        );
     }
 
 }

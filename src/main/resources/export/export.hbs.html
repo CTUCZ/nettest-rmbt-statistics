@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang='de'>
+<html lang='cs'>
 <head>
     <title>{{ Lang.results_test }}</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <!--<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">-->
     <meta charset="UTF-8">
-<!--    <link rel="stylesheet" href="basecss.css"/> -->
+    <!--    <link rel="stylesheet" href="basecss.css"/> -->
     <style>
         /*!
  * Generated using the Bootstrap Customizer (https://getbootstrap.com/docs/3.4/customize/)
@@ -109,10 +109,10 @@
 <script type="text/x-handlebars" id="template">
     {{#with tests.[1]}}
     <div class="title-page">
-        <img class="rtr-logo-title" src="data:image/png;base64,{{logo}}" />
+        <!--<img class="rtr-logo-title" src="data:image/png;base64,{{logo}}" />-->
         <h1>{{ Lang.results_test }}
         </h1>
-        <p class="date">{{ Lang.generated_at }}: {{date}} ({{ Lang.vienna }})</p>
+        <p class="date">{{ Lang.generated_at }}: {{date}} ({{Lang.prague}})</p>
     </div>
     <div class="toc">
         <h2>{{ Lang.table_of_contents }}</h2>
@@ -121,7 +121,7 @@
             <li><a href="#test-details">2. {{ Lang.single_measurement_results }}</a></li>
             <ul>
                 {{#each tests}}
-                    <li>2.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{time}}</a></li>
+                <li>2.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{toLocalFormat time}}</a></li>
                 {{/each}}
             </ul>
         </ul>
@@ -143,21 +143,21 @@
             </thead>
             <tbody>
             {{#each tests}}
-                <tr>
-                    <th scope="row">{{add @index 1}}</th>
-                    <td>{{time}}</td>
-                    <td>{{open_test_uuid}}</td>
-                    <td class="text-right">{{toMbit download_kbit}}</td>
-                    <td class="text-right">{{toMbit upload_kbit}}</td>
-                    <td class="text-right">{{twoSignificantDigits ping_ms}}</td>
-                </tr>
+            <tr>
+                <th scope="row">{{add @index 1}}</th>
+                <td>{{toLocalFormat time}}</td>
+                <td>{{open_test_uuid}}</td>
+                <td class="text-right">{{toMbit download_kbit}}</td>
+                <td class="text-right">{{toMbit upload_kbit}}</td>
+                <td class="text-right">{{twoSignificantDigits ping_ms}}</td>
+            </tr>
             {{/each}}
             </tbody>
         </table>
 
         {{#if loop_uuid}}
         <p>{{ Lang.results_url }}:<br/>
-            <a href="https://www.netztest.at/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}">https://www.netztest.at/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}</a>
+            <a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}</a>
         </p>
         {{/if }}
     </div>
@@ -165,7 +165,7 @@
     <div class="test-details" id="test-details">
         {{#each tests}}
         <div class="single-test">
-            <h2 id="{{open_test_uuid}}" >{{ Lang.measurement }} {{#if items.[1]}}{{add @index 1}}{{else}}{{/if}}</h2>
+            <h2 id="{{open_test_uuid}}" >{{ Lang.measurement }} {{#if ../tests.[1]}}{{add @index 1}}{{else}}{{/if}}</h2>
             <h3>{{ Lang.result }}</h3>
             <table class="table table-striped">
                 <colgroup>
@@ -186,11 +186,15 @@
                 </tr>
                 <tr>
                     <td>{{ Lang.time_utc }}</td>
-                    <td>{{time}}</td>
+                    <td>{{toLocalFormat time}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.open_test_uuid }}</td>
+                    <td>{{open_test_uuid}}</td>
                 </tr>
             </table>
             <p>
-                {{ Lang.result_detail_link }}: <br/><a href="https://www.netztest.at/{{ Lang.lang }}/Opentest?{{open_test_uuid}}">https://www.netztest.at/{{ Lang.lang }}/Opentest?{{open_test_uuid}}</a>
+                {{ Lang.result_detail_link }}: <br/><a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}</a>
             </p>
 
             <h3>{{ Lang.detailed_result }}</h3>
@@ -505,39 +509,39 @@
     const loop_uuid = 'L33c1a04c-610e-4060-8ae7-7c812b7eb512';
     let allData = [];
 
-    fetch('https://m-cloud.netztest.at/RMBTStatisticServer/opentests/search?loop_uuid=' + loop_uuid)
-            .then(response => {
-                return response.json()
-            })
-            .then(tests => {
-                return Promise.all(
-                        tests.results.map(test => {
-                                    return fetch('https://m-cloud.netztest.at/RMBTStatisticServer/opentests/' + test.open_test_uuid)
-                                            .then(response => {
-                                                return response.json();
-                                            })
-                                            .then(test => {
-                                                allData.push(test);
-                                            })
-                                }
-                        ))
-            })
+    fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/search?loop_uuid=' + loop_uuid)
+        .then(response => {
+            return response.json()
+        })
+        .then(tests => {
+            return Promise.all(
+                tests.results.map(test => {
+                                      return fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/' + test.open_test_uuid)
+                                          .then(response => {
+                                              return response.json();
+                                          })
+                                          .then(test => {
+                                              allData.push(test);
+                                          })
+                                  }
+                ))
+        })
 
-    .then(done => {
-        //fill model
-        let model = {
-            tests: allData,
-            loop_uuid: loop_uuid,
-            date: (new Date()).toLocaleString()
-        };
+        .then(done => {
+            //fill model
+            let model = {
+                tests: allData,
+                loop_uuid: loop_uuid,
+                date: (new Date()).toLocaleString()
+            };
 
-        var template = Handlebars.compile(document.querySelector("#template").innerHTML);
-        var html = template(model);
+            var template = Handlebars.compile(document.querySelector("#template").innerHTML);
+            var html = template(model);
 
-        window.setTimeout(function() {
-            document.getElementsByTagName("body")[0].innerHTML = html;
-        }, 0);
-    })
+            window.setTimeout(function() {
+                document.getElementsByTagName("body")[0].innerHTML = html;
+            }, 0);
+        })
 
 
 

@@ -45,7 +45,7 @@
             font-weight: bold;
         }
 
-        .toc, .title-page, .user-details, .single-test, .test-list {
+        .toc, .title-page, .user-details, .validation, .single-test, .test-list {
             page-break-after: always;
 
         }
@@ -101,12 +101,24 @@
             page-break-inside: auto;
         }
 
+        .validation .detail {
+            page-break-inside: avoid;
+        }
+
         .test-details {
             page-break-before: always;
         }
 
         a {
             font-variant-ligatures: none;
+        }
+
+        .invalid {
+            background-color: #e4b9b9;
+        }
+
+        h4 {
+            font-weight: bold;
         }
     </style>
 
@@ -124,11 +136,11 @@
         <h2>{{ Lang.table_of_contents }}</h2>
         <ul>
             <li><a href="#test-list">1. {{ Lang.conducted_measurements }}</a></li>
-            <li><a href="#user-details">2. {{ Lang.user_provided_data }}</a></li>
+            <li><a href="#validation">2. {{ Lang.validation }}</a></li>
             <li><a href="#test-details">3. {{ Lang.single_measurement_results }}</a></li>
             <ul>
                 {{#each tests}}
-                    <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{toLocalFormat time}}</a></li>
+                    <li>3.<a href="#{{open_test_uuid}}">{{add @index 1}}. {{toLocalTime time}}</a></li>
                 {{/each}}
             </ul>
         </ul>
@@ -141,8 +153,8 @@
             <thead>
             <tr>
                 <th>#</th>
-                <th>{{ Lang.time_utc }}</th>
-                <th>{{ Lang.open_test_uuid }}</th>
+                <th>{{ Lang.time }}</th>
+                <th>Status</th>
                 <th class="text-right">{{ Lang.download }}<br/>({{ Lang.mbps }})</th>
                 <th class="text-right">{{ Lang.upload }}<br/>({{ Lang.mbps }})</th>
                 <th class="text-right">{{ Lang.ping }}<br/>({{ Lang.ms }})</th>
@@ -152,8 +164,8 @@
             {{#each tests}}
                 <tr>
                     <th scope="row">{{add @index 1}}</th>
-                    <td>{{toLocalFormat time}}</td>
-                    <td>{{open_test_uuid}}</td>
+                    <td>{{toLocalTime time}}</td>
+                    <td>{{translatedStatus}}</td>
                     <td class="text-right">{{toMbit download_kbit}}</td>
                     <td class="text-right">{{toMbit upload_kbit}}</td>
                     <td class="text-right">{{twoSignificantDigits ping_ms}}</td>
@@ -162,7 +174,6 @@
             </tbody>
         </table>
 
-        <p>{{ Lang.note_timestamp }}</p>
         {{#if loop_uuid}}
         <p>{{ Lang.results_url }}:<br/>
             <a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentests?loop_uuid={{loop_uuid}}</a>
@@ -170,186 +181,115 @@
         {{/if }}
     </div>
 
-    <div class="user-details" id="user-details">
-        <h2>{{ Lang.user_provided_data }}</h2>
-        <div class="detail">
-        {{#if title_prepend}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.title_prepended }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{title_prepend}}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if first_name}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.first_name }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{first_name}}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if last_name}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.last_name }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{last_name}}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if title_append}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.title_appended }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{title_append}}
-            </p>
-        </div>
-        {{/if}}
-
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.measurement_location }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{nl2br address}}
-            </p>
-        </div>
-         <!-- <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>Zyklus</strong>
-            </p>
-            <p class="col-xs-8">
-                {{#ifCond first '==' 'y'}}
-                Erster Messzyklus
-                {{/ifCond}}
-                {{#ifCond first '==' 'n'}}
-                Folgezyklus
-                {{/ifCond}}
-            </p>
-         </div> -->
-        </div>
-       {{#ifCond first '==' 'y'}}
-       
-        <div class="detail">
-        {{#if isp_name}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.provider_name }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{ isp_name }}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if isp_service_name}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.provider_service_name }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{ isp_service_name }}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if isp_contract_number}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.provider_contract_number }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{ isp_contract_number }}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if isp_adv_speed}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.provider_adv_speed }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{ isp_adv_speed }}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if isp_norm_speed}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.provider_norm_speed }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{ isp_norm_speed }}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if type_text}}
-        <div class="row">
-           <p class="col-xs-4 text-right">
-                <strong>{{ Lang.access_type }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{nl2br type_text}}
-            </p>
-        </div>
-        {{/if}}
-
-        {{#if test_device}}
-        <div class="row">
-            <p class="col-xs-4 text-right">
-                <strong>{{ Lang.test_device }}</strong>
-            </p>
-            <p class="col-xs-8">
-                {{nl2br test_device}}
-            </p>
-        </div>
-        {{/if}}
-
-    </div>
-
-    {{#if test_picturesArr}}
-    <div class="">
-    {{#each test_picturesArr}}
-    <div class="row detail">
-        <p class="col-xs-2 text-right">
-            <strong>{{ Lang.photo_upload }}</strong>
+    <div class="validation" id="validation">
+        <h2>{{ Lang.validation }}</h2>
+        <p>
+            {{ Lang.validation_desc }}
         </p>
-        <p class="col-xs-9">
-            <img src="{{this}}" class="img-responsive" style="max-height:20cm" />
-        </p>
-    </div>
-    {{/each}}
-    </div>
-    {{/if}}
-    
-    {{#if test_pictures}}
-    <div class="">
-        <div class="row detail">
-            <p class="col-xs-2 text-right">
-                <strong>{{ Lang.photo_upload }}</strong>
-            </p>
-            <p class="col-xs-9">
-                <img src="{{test_pictures}}" class="img-responsive" style="max-height:20cm" />
-            </p>
+        <div class="detail">
+            {{ Lang.validation_uuid }}: {{removeFirst loop_uuid}}
+            <ul>
+                {{#each tests}}
+                <li>{{ Lang.measurement }} {{add @index 1}} UUID: {{removeFirst open_test_uuid}}</li>
+                {{/each}}
+            </ul>
+        </div>
+        <div class="detail">
+            {{#if valid }}
+            <h3>{{ Lang.validation_noerror }}</h3>
+            {{else}}
+            <h3>{{ Lang.validation_error }}</h3>
+            {{#if invalidDistance }}
+            <h4>{{ Lang.validation_distance }}</h4>
+            <p>{{ Lang.validation_distance_max }}: {{ maxValidDistance }} {{ Lang.validation_m }}</p>
+            <p>{{ Lang.validation_loc_src }}: {{ validDistanceLocSrc }}</p>
+            <ul>
+                {{#each invalidDistance }}
+                <li>{{ Lang.measurement }} #{{ testId }}: {{ distance }} {{ Lang.validation_m }}<br/>{{ locSrc }}</li>
+                {{/each}}
+            </ul>
+            {{/if}}
+            {{#if invalidNumOfTests }}
+            <h4>{{ Lang.validation_test_count }}</h4>
+            <ul><li>{{ Lang.validation_test_completed }}: {{ numOfFinishedTests }}</li></ul>
+            {{/if}}
+            {{#if invalidTime }}
+            <h4>{{ Lang.validation_test_duration }}</h4>
+            <ul><li>{{ Lang.validation_test_duration_note }}: {{ invalidTime }}</li></ul>
+            {{/if}}
+            {{#if invalidLocation}}
+            <h4>{{ Lang.validation_loc }}</h4>
+            <ul>
+                {{#each invalidLocation}}
+                <li>{{ Lang.measurement }} {{this}} - {{ Lang.validation_loc_missing }}</li>
+                {{/each}}
+            </ul>
+            {{/if}}
+            {{#if invalidNetwork}}
+            <h4>{{ Lang.network_type }}</h4>
+            <p>{{ Lang.validation_network }}</p>
+            <ul>
+                <li>{{ Lang.validation_network }}</li>
+                <ul>
+                    {{#each invalidNetwork}}
+                    <li>{{ Lang.measurement }} #{{testNum}} - {{networkType}}</li>
+                    {{/each}}
+                </ul>
+            </ul>
+            {{/if}}
+            {{#if invalidMcc }}
+            <h4>{{ Lang.validation_roaming }}</h4>
+            <ul>
+                {{#each invalidMcc }}
+                <li>{{ Lang.measurement }} #{{ testNum }} - {{mcc}}</li>
+                {{/each}}
+            </ul>
+            {{/if}}
+            {{#if invalidSimOperator }}
+            <h4>{{ Lang.validation_sim }}</h4>
+            <ul>
+                {{#each invalidSimOperator }}
+                <li>{{ Lang.measurement }} #{{ testNum }} - {{ Lang.provider }}: {{networkMccMnc}}, sim: {{simMccMnc}}</li>
+                {{/each}}
+            </ul>
+            {{/if}}
+            {{#if invalidSameNetwork}}
+            <h4>{{ Lang.validation_provider }}</h4>
+            <ul>
+                {{#each tests}}
+                <li>{{ Lang.measurement }} #{{add @index 1}} - {{network_mcc_mnc}}</li>
+                {{/each}}
+            </ul>
+            {{/if}}
+            {{#if invalidSignal }}
+            <h4>{{ Lang.validation_signal }}</h4>
+            <ul>
+                {{#each invalidSignal }}
+                <li>{{ Lang.measurement }} #{{ testId }}:
+                    <ul>
+                        {{#each messages}}
+                        <li>{{this}}</li>
+                        {{/each}}
+                    </ul>
+                </li>
+                {{/each}}
+            </ul>
+            {{/if}}
+            {{#if invalidRoaming }}
+            <h4>Roaming</h4>
+            <ul>
+                <li>{{ Lang.validation_roaming_note }}</li>
+                <li><h5>{{ Lang.validation_roaming_type }}</h5></li>
+                <ul>
+                    {{#each invalidRoaming }}
+                    <li>{{ Lang.measurement }} #{{ testId }} {{ Lang.validation_roaming_type }}: {{ roamingType }}, {{ Lang.network_type }}: {{ networkType }}</li>
+                    {{/each}}
+                </ul>
+            </ul>
+            {{/if}}
+            {{/if}}
         </div>
     </div>
-    {{/if}}
-    </div>
-    {{/ifCond}}
 
     <div class="test-details" id="test-details">
         {{#each tests}}
@@ -358,9 +298,13 @@
             <h3>{{ Lang.result }}</h3>
             <table class="table table-striped">
                 <colgroup>
-                    <col class="col-xs-3"/>
-                    <col class="col-xs-9"/>
+                    <col class="col-xs-4"/>
+                    <col class="col-xs-8"/>
                 </colgroup>
+                <tr>
+                    <td>Status</td>
+                    <td>{{translatedStatus}}</td>
+                </tr>
                 <tr>
                     <td>{{ Lang.download }}</td>
                     <td>{{toMbit download_kbit}} {{ Lang.mbps }}</td>
@@ -378,27 +322,22 @@
                     <td>{{toLocalFormat time}}</td>
                 </tr>
                 <tr>
+                    <td>{{ Lang.time_device }}</td>
+                    <td>{{toLocalTime time}} ({{timezone}}) </td>
+                </tr>
+                <tr>
                     <td>{{ Lang.open_test_uuid }}</td>
                     <td>{{open_test_uuid}}</td>
                 </tr>
-            </table>
-            <p>
-                {{ Lang.result_detail_link }}: <br/><a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}</a>
-            </p>
+                <tr>
+                    <td>{{ Lang.open_uuid }}</td>
+                    <td>{{open_uuid}}</td>
+                </tr>
 
-            <h3>{{ Lang.detailed_result }}</h3>
-            <table class="table table-striped table-condensed">
-                <colgroup>
-                    <col class="col-xs-3"/>
-                    <col class="col-xs-9"/>
-                </colgroup>
+                <!-- others section -->
                 <tr>
                     <td>{{ Lang.network_type }}</td>
                     <td>{{network_type}}</td>
-                </tr>
-                <tr>
-                    <td>{{ Lang.cat_technology }}</td>
-                    <td>{{cat_technology}}</td>
                 </tr>
                 {{#if position}}
                 <tr>
@@ -412,13 +351,55 @@
                     <td>{{provider_name}}</td>
                 </tr>
                 {{/if}}
+                <!-- location section -->
                 <tr>
-                    <td>{{ Lang.ip_anonym }}</td>
-                    <td>{{ip_anonym}}</td>
+                    <td>{{ Lang.location }}</td>
+                    <td>{{this.lat}} {{this.long}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.validation_loc_src }}</td>
+                    <td>{{loc_src}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.validation_loc_accuracy }}</td>
+                    <td>{{roundUp loc_accuracy}} {{ Lang.validation_m }}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.validation_movement }}</td>
+                    <td>{{roundUp distance}} {{ Lang.validation_m }}</td>
+                </tr>
+            </table>
+            <p>
+                {{ Lang.result_detail_link }}: <br/><a href="https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}">https://nettest.ctu.gov.cz/{{ Lang.lang }}/Opentest?{{open_test_uuid}}</a>
+            </p>
+
+            <h3>{{ Lang.detailed_result }}</h3>
+
+            <table class="table table-striped table-condensed">
+                <colgroup>
+                    <col class="col-xs-4"/>
+                    <col class="col-xs-8"/>
+                </colgroup>
+                <!-- ip section -->
+                <tr>
+                    <td>{{ Lang.client_public_ip }}</td>
+                    <td>{{ip_public}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.client_local_ip }}</td>
+                    <td>{{ip_local}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.server_name }}</td>
+                    <td>{{server_name}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.server_ip }}</td>
+                    <td>{{this.server_web_address}}</td>
                 </tr>
                 {{#if connection}}
                 <tr>
-                    <td>{{ Lang.nat_type }}</td>
+                    <td>NAT</td>
                     <td>{{connection}}</td>
                 </tr>
                 {{/if}}
@@ -426,34 +407,7 @@
                     <td>{{ Lang.asn }}</td>
                     <td>{{asn}}</td>
                 </tr>
-                {{#if public_ip_as_name}}
-                <tr>
-                    <td>{{ Lang.public_ip_as_name }}</td>
-                    <td>{{public_ip_as_name}}</td>
-                </tr>
-                {{/if}}
-                {{#if country_asn}}
-                <tr>
-                    <td>{{ Lang.country_asn }}</td>
-                    <td>{{country_asn}}</td>
-                </tr>
-                {{/if}}
-                <tr>
-                    <td>{{ Lang.platform }}</td>
-                    <td>{{platform}}</td>
-                </tr>
-                {{#if model}}
-                <tr>
-                    <td>{{ Lang.model }}</td>
-                    <td>{{model}}</td>
-                </tr>
-                {{/if}}
-                {{#if model_native}}
-                <tr>
-                    <td>{{ Lang.model_native }}</td>
-                    <td>{{model_native}}</td>
-                </tr>
-                {{/if}}
+                <!-- data section -->
                 {{#if time_dl_ms}}
                 <tr>
                     <td>{{ Lang.time_dl_ms }}</td>
@@ -490,257 +444,80 @@
                     <td>{{toMB bytes_upload}} MB</td>
                 </tr>
                 {{/if}}
-                {{#if server_name}}
+                <!-- network section -->
                 <tr>
-                    <td>{{ Lang.server_name }}</td>
-                    <td>{{server_name}}</td>
+                    <td>{{ Lang.validation_net_code }}</td>
+                    <td>{{network_mcc_mnc}}</td>
                 </tr>
-                {{/if}}
-                {{#if client_version}}
                 <tr>
-                    <td>{{ Lang.client_version }}</td>
+                    <td>{{ Lang.validation_net_name }}</td>
+                    <td>{{network_name}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.validation_sim_code }}</td>
+                    <td>{{sim_mcc_mnc}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.validation_sim_name }}</td>
+                    <td>{{sim_operator_name}}</td>
+                </tr>
+                <!-- mobile section -->
+                <tr>
+                    <td>{{ Lang.platform }}</td>
+                    <td>{{platform}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.os_version }}</td>
+                    <td>{{os_version}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.model_native }}</td>
+                    <td>{{model_native}}</td>
+                </tr>
+                <tr>
+                    <td>DUAL SIM</td>
+                    <td>{{translateBool dual_sim Lang.lang}}</td>
+                </tr>
+                <tr>
+                    <td>{{ Lang.client_app_version }}</td>
                     <td>{{client_version}}</td>
-                </tr>
-                {{/if}}
-                {{#if test_duration}}
-                <tr>
-                    <td>{{ Lang.duration }}</td>
-                    <td>{{test_duration}} s</td>
-                </tr>
-                {{/if}}
-                {{#if num_threads_requested}}
-                <tr>
-                    <td>{{ Lang.num_threads_requested }}</td>
-                    <td>{{num_threads_requested}}</td>
-                </tr>
-                {{/if}}
-                {{#if num_threads}}
-                <tr>
-                    <td>{{ Lang.num_threads }}</td>
-                    <td>{{num_threads}}</td>
-                </tr>
-                {{/if}}
-                {{#if num_threads_ul}}
-                <tr>
-                    <td>{{ Lang.num_threads_ul }}</td>
-                    <td>{{num_threads_ul}}</td>
-                </tr>
-                {{/if}}
-                <tr>
-                    <td>{{ Lang.open_test_uuid }}</td>
-                    <td>{{open_test_uuid}}</td>
-                </tr>
-                <tr>
-                    <td>{{ Lang.open_uuid }}</td>
-                    <td>{{open_uuid}}</td>
                 </tr>
             </table>
 
-
-
-
-
+            <div class="single-test">
+                <h3>{{ Lang.signal_strength }} (detail)</h3>
+                <table class="table table-striped table-condensed">
+                    <thead>
+                    <tr style="font-weight: bold; font-size: smaller">
+                        <td>Time</td>
+                        <td>Location ID</td>
+                        <td>Area Code</td>
+                        <td>Channel Number</td>
+                        <td>RSRP</td>
+                        <td>RSRQ</td>
+                        <td>Technology</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each signal_list}}
+                    <tr>
+                        <td>{{time}}</td>
+                        <td>{{locationId}}</td>
+                        <td>{{areaCode}}</td>
+                        <td>{{channelNumber}}</td>
+                        <!-- RSRP column -->
+                        <td>{{this.getConditionedSignalStrength}}</td>
+                        <td>{{lteRsrq}}</td>
+                        <td>{{networkTechnology}}</td>
+                    </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
         </div>
         {{/each}}
 
     </div>
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.js"></script>
-<script>
-    //some demo tests
-    const loop_uuid = 'L33c1a04c-610e-4060-8ae7-7c812b7eb512';
-    let allData = [];
-
-    var Lang = {
-        "lang": "de",
-        "results_certified_measurement": "Ergebnisse der zertifizierten Messung",
-        "generated_at": "Ausdruck erstellt am",
-        "table_of_contents": "Inhaltsverzeichnis",
-        "conducted_measurements": "Durchgeführte Messungen",
-        "user_provided_data": "Angaben des Nutzers/der Nutzerin",
-        "single_measurement_results": "Einzelergebnisse",
-        "conducted_measurements_desc": "Folgende Messungen wurden durchgeführt",
-        "time": "Testzeitpunkt",
-        "open_test_uuid": "Open-Test-UUID",
-        "download": "Download",
-        "upload": "Download",
-        "ping": "Download",
-        "mbps": "Mbit/s",
-        "ms": "ms",
-        "results_url": "Alle Ergebnisse sind unter folgender URL abrufbar",
-        "title_prepended": "Titel (vorangestellt)",
-        "first_name": "Vorname",
-        "last_name": "Nachname",
-        "title_appended": "Titel (nachgestellt)",
-        "measurement_location": "Standort der Messungen",
-        "first_cycle_question": "Handelt es sich um den ersten Messzyklus?",
-        "yes_first_cycle": "Ja, erster Messzyklus",
-        "no_subsequent_cycle": "Nein, Folgezyklus",
-        "location_access": "Beschreiben Sie den Standort des Anschlusses",
-        "location_access_residential": "Wohnhausanlage",
-        "location_access_single_family": "Einfamilienhaus",
-        "location_access_urban": "Städtischer Umgebung",
-        "location_access_rural": "Ländliche Umgebung",
-        "location_access_other": "Sonstiges",
-        "access_type": "Beschreiben Sie Ihren Anschluss",
-        "test_device": "Beschreiben Sie Ihr Testgerät",
-        "photo_upload": "Fotoupload",
-        "measurement": "Messung",
-        "result_detail_link": "Dieses Ergebnis kann hier im Detail abgerufen werden",
-        "result": "Testergebnis",
-        "detailed_result": "Detailergebnis",
-        'network_type': 'Netztyp',
-        'cat_technology' : 'Verbindungstechnologie',
-        'provider_name': 'Betreiber',
-        'nat_type': 'NAT-Status',
-        'location': 'Standort',
-        'ip_anonym' : 'IP (anonymisiert)',
-        'asn': 'AS-Nummer',
-        'public_ip_as_name': 'Name des IP-Netzwerks',
-        'country_asn': 'Land des AS',
-        'platform' : 'Plattform',
-        'model': 'Modell',
-        'model_native': 'Modell (Original)',
-        'time_dl_ms': 'Rel. Startzeitpunkt Download',
-        'time_ul_ms': 'Rel. Startzeitpunkt Upload',
-        'bytes_download': 'Datenmenge Download',
-        'bytes_upload': 'Datenmenge Upload',
-        'duration_download_ms': 'Downloaddauer',
-        'duration_upload_ms': 'Uploaddauer',
-        'server_name': 'Name Testserver',
-        'client_version': 'RMBT-Version',
-        'duration': 'Testdauer',
-        'num_threads_requested': 'Anzahl angef. Verbindungen',
-        'num_threads': 'Parallele Verbindungen DL',
-        'num_threads_ul': 'Parallel Verbindungen UL',
-        'open_uuid' : 'Open-User-UUID'
-    }
-
-
-    fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/search?loop_uuid=' + loop_uuid)
-            .then(response => {
-                return response.json()
-            })
-            .then(tests => {
-                return Promise.all(
-                        tests.results.map(test => {
-                                    return fetch('https://nettest.ctu.gov.cz/RMBTStatisticServer/opentests/' + test.open_test_uuid)
-                                            .then(response => {
-                                                return response.json();
-                                            })
-                                            .then(test => {
-                                                test.Lang = Lang;
-                                                allData.push(test);
-                                            })
-                                }
-                        ))
-            })
-
-    .then(done => {
-        //fill model
-        let model = {
-            tests: allData,
-            loop_uuid: loop_uuid,
-            date: (new Date()).toLocaleString(),
-            Lang: Lang
-        };
-
-        var template = Handlebars.compile(document.querySelector("#template").innerHTML);
-        var html = template(model);
-
-        window.setTimeout(function() {
-            document.getElementsByTagName("body")[0].innerHTML = html;
-        }, 0);
-    })
-
-
-
-
-    //https://stackoverflow.com/questions/26529338/handlebars-js-template-with-custom-helper-to-slice-data-array
-    Handlebars.registerHelper('slice', function (context, limit, offset, block) {
-        var ret = "";
-        var i = (offset < context.length) ? offset : 0;
-        var j = ((limit + offset) < context.length) ? (limit + offset) : context.length;
-
-        for (i, j; i < j; i++) {
-            ret += block.fn(context[i]);
-        }
-        return ret;
-    });
-
-    Handlebars.registerHelper('IfLE', function(list, size, options) {
-        if (list.length <= size) {
-            return options.fn(this);
-        }
-        else {
-            return options.inverse(this);
-        }
-    });
-
-    //https://stackoverflow.com/questions/8853396/logical-operator-in-a-handlebars-js-if-conditional
-    Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
-        if (v1 instanceof Array) {
-            v1 = v1.length;
-        }
-
-
-        switch (operator) {
-            case '==':
-                return (v1 == v2) ? options.fn(this) : options.inverse(this);
-            case '===':
-                return (v1 === v2) ? options.fn(this) : options.inverse(this);
-            case '!=':
-                return (v1 != v2) ? options.fn(this) : options.inverse(this);
-            case '!==':
-                return (v1 !== v2) ? options.fn(this) : options.inverse(this);
-            case '<':
-            case '&lt;':
-                return (v1 < v2) ? options.fn(this) : options.inverse(this);
-            case '<=':
-            case '&lt;=':
-                return (v1 <= v2) ? options.fn(this) : options.inverse(this);
-            case '>':
-            case '&gt;':
-                return (v1 > v2) ? options.fn(this) : options.inverse(this);
-            case '>=':
-            case '&gt;=':
-                return (v1 >= v2) ? options.fn(this) : options.inverse(this);
-            case '&&':
-                return (v1 && v2) ? options.fn(this) : options.inverse(this);
-            case '||':
-                return (v1 || v2) ? options.fn(this) : options.inverse(this);
-            default:
-                return options.inverse(this);
-        }
-    });
-
-    //https://stackoverflow.com/a/11924998
-    Handlebars.registerHelper('times', function(n, block) {
-        var accum = '';
-        for(var i = 0; i < n; ++i)
-            accum += block.fn(i);
-        return accum;
-    });
-
-    Handlebars.registerHelper("add",(number, increment) => {
-        var iNumber = parseInt(number);
-        var sum = iNumber + increment;
-        return sum;
-    });
-
-    Handlebars.registerHelper("toMbit",(number) => {
-        return (number/1000).toLocaleString('de-DE',{maximumSignificantDigits:2});;
-    });
-
-    Handlebars.registerHelper("twoSignificantDigits",(number) => {
-        return number.toLocaleString('de-DE',{maximumSignificantDigits:2});
-    });
-
-    Handlebars.registerHelper("nl2br",(string) => {
-        return string;
-    });
-
 </script>
 </body>
 </html>

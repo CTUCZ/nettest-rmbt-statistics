@@ -24,6 +24,9 @@ public class RedisConfig {
     @Value("${redis.host}")
     private String redisHost;
 
+    @Value("${redis.password}")
+    private String redisPassword;
+
     @Bean
     public RedisCacheConfiguration cacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
@@ -42,7 +45,9 @@ public class RedisConfig {
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-        return new JedisConnectionFactory(new RedisStandaloneConfiguration(redisHost, redisPort));
+        final var configuration = new RedisStandaloneConfiguration(redisHost, redisPort);
+        configuration.setPassword(redisPassword);
+        return new JedisConnectionFactory(configuration);
     }
 
     @Bean
