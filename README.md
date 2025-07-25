@@ -13,10 +13,10 @@ It consists of the following components:
 * QoS measurement server
 * Control server
 * Statistics server (in this repository) 
-* Map server
+* Map server (not used by CTU)
 
 *Open-RMBT* is released under the [Apache License, Version 2.0](LICENSE). It was developed
-by the [Austrian Regulatory Authority for Broadcasting and Telecommunications (RTR-GmbH)](https://www.rtr.at/).
+by the [Austrian Regulatory Authority for Broadcasting and Telecommunications (RTR-GmbH)](https://www.rtr.at/) and modified by the [Czech Telecommunication Office (CTU)](https://ctu.gov.cz/).
 
 
 Related material
@@ -76,7 +76,7 @@ for basic setup instructions.
 
 ### Alternative: Get WAR using Github action
 
-The `WAR build` action produces a WAR file that can be used on a server. This only applies to the `master` branch.
+The `WAR build` action produces a WAR file that can be used on a server.
 
 ### Configure Tomcat
 
@@ -105,6 +105,7 @@ Edit `/etc/tomcat9/context.xml`, add to `<Context>`:
 <!-- Statistic redis connection -->
 <Parameter name="STATISTIC_REDIS_HOST" value="localhost" override="false"/>
 <Parameter name="STATISTIC_REDIS_PORT" value="6379" override="false"/>
+<Parameter name="STATISTIC_REDIS_PASSWORD" value="[change_me]" override="false"/>
 
 <!-- Statistic - logback configuration -->
 <Parameter name="LOGGING_CONFIG_FILE_STATISTIC" value="/etc/tomcat9/logback-statistic.xml" override="false"/>
@@ -165,3 +166,8 @@ Again, make sure the file `etc/tomcat9/logback-statistic.xml` is owned by`tomcat
 
  apt -y install weasyprint
 
+Get in Touch
+------------
+
+* [CTU-NetTest](https://nettest.ctu.gov.cz) on the web
+* [RTR-Netztest](https://www.netztest.at) on the web
